@@ -1,0 +1,38 @@
+model Plan {
+  planId      String  @id() @default(uuid()) @map("plan_id") @db.Uuid
+  name        String  @unique
+  description String?
+  isActive    Boolean @default(true) @map("is_active")
+  sortOrder   Int     @default(0)
+
+  kind         String  @default("standard") // standard, enterprise_custom
+  // For 'standard' plans this is the public price.
+  // For 'enterprise_custom' plans this is the negotiated academy-specific price.
+  monthlyPrice Decimal @map("monthly_price") @db.Decimal(10, 2)
+  yearlyPrice  Decimal @map("yearly_price") @db.Decimal(10, 2)
+  currency     String  @default("USD")
+
+  // Optional binding for private enterprise plans.
+  tenantId String? @map("tenant_id") @db.Uuid
+
+  // quota columns
+  maxProjects Int @default(0) @map("max_projects")
+  maxUsers    Int @default(0) @map("max_users")
+  maxSessions Int @default(0) @map("max_sessions")
+  maxRequests Int @default(0) @map("max_requests")
+
+  // trial settings
+  trialDays Int @default(0) @map("trial_days")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // relations
+  subscriptions        TenantSubscription[]
+  pendingSubscriptions TenantSubscription[] @relation("PendingPlan")
+  // Optional binding for private enterprise plans.
+  tenant               Tenant?              @relation("EnterprisePlanTenant", fields: [tenantId], references: [tenantId], onDelete: Cascade)
+
+  @@index([kind, tenantId])
+  @@map("plans")
+}

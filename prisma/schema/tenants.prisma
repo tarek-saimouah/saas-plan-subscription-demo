@@ -1,0 +1,46 @@
+model Tenant {
+  tenantId String @id() @default(uuid()) @map("tanant_id") @db.Uuid
+
+  name    String @unique
+  ownerId String @unique @map("owner_id") @db.Uuid
+
+  suspendedAt DateTime? @map("suspended_at") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // relations
+  owner                  User                    @relation(fields: [ownerId], references: [userId], onDelete: Cascade)
+  subscription           TenantSubscription?
+  enterprisePlans        Plan[]                  @relation("EnterprisePlanTenant")
+  usage                  TenantUsage?
+  enterprisePlanRequests EnterprisePlanRequest[]
+
+  @@map("tenants")
+}
+
+model EnterprisePlanRequest {
+  requestId String @id() @default(uuid()) @map("request_id") @db.Uuid
+  tenantId  String @map("tenant_id") @db.Uuid
+
+  title       String
+  description String
+
+  // quota columns
+  expectedproducts Int? @map("expected_products")
+  expectedusers    Int? @map("expected_users")
+  expectedsessions Int? @map("expected_sessions")
+  expectedrequests Int? @map("expected_requests")
+
+  status String @default("pending") // pending, contacted, approved, rejected
+
+  adminNotes String?  @map("admin_notes")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // relations
+  tenant Tenant @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@map("enterprise_plan_requests")
+}

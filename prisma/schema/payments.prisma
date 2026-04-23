@@ -1,0 +1,25 @@
+model SubscriptionPayment {
+  paymentId      String @id() @default(uuid()) @map("payment_id") @db.Uuid
+  subscriptionId String @map("subscription_id") @db.Uuid
+
+  provider           String
+  providerEventId    String? @unique @map("provider_event_id")
+  providerPaymentRef String? @unique @map("provider_payment_ref")
+  amount             Decimal @db.Decimal(10, 2)
+  currency           String  @default("USD")
+  status             String  @default("pending") // pending, succeeded, failed, refunded
+
+  rawPayload    Json?     @map("raw_payload") @db.JsonB
+  paidAt        DateTime? @map("paid_at") @db.Timestamptz(6)
+  failedAt      DateTime? @map("failed_at") @db.Timestamptz(6)
+  failureReason String?   @map("failure_reason")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // relations
+  subscription                     TenantSubscription   @relation(fields: [subscriptionId], references: [subscriptionId], onDelete: Cascade)
+  latestPaymentTenantSubscriptions TenantSubscription[] @relation("LatestPayment")
+
+  @@map("subscription_payments")
+}

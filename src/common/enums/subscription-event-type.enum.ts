@@ -1,0 +1,17 @@
+export enum SubscriptionEventTypeEnum {
+  TRIAL_STARTED = 'trial_started',
+  TRIAL_EXPIRED = 'trial_expired',
+  PAYMENT_PENDING = 'payment_pending',
+  PAYMENT_SUCCEEDED = 'payment_succeeded',
+  PAYMENT_FAILED = 'payment_failed',
+  RENEWED = 'renewed',
+  UPGRADED = 'upgraded',
+  DOWNGRADED = 'downgraded',
+  DOWNGRADE_SCHEDULED = 'downgrade_scheduled',
+  CANCELLED = 'cancelled',
+  SUSPENDED = 'suspended',
+  REACTIVATED = 'reactivated',
+  MANUAL_ADJUSTMENT = 'manual_adjustment',
+  ENTERPRISE_PLAN_CREATED = 'enterprise_plan_created',
+  ENTERPRISE_PLAN_UPDATED = 'enterprise_plan_updated',
+}

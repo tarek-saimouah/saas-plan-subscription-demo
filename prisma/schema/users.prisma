@@ -1,0 +1,18 @@
+model User {
+  userId           String  @id() @default(uuid()) @map("user_id") @db.Uuid
+  email            String  @unique
+  password         String
+  fullName         String  @map("full_name")
+  role             String  @default("user") // user, admin
+  isActive         Boolean @default(true) @map("is_active")
+  isVerified       Boolean @default(false) @map("is_verified")
+  verificationCode String? @map("verification_code")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // relations
+  tenant Tenant?
+
+  @@map("users")
+}

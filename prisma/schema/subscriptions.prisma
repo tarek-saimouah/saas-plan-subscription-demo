@@ -1,0 +1,94 @@
+model TenantSubscription {
+  subscriptionId String @id() @default(uuid()) @map("subscription_id") @db.Uuid
+  tenantId       String @unique @map("tenant_id") @db.Uuid
+  planId         String @map("plan_id") @db.Uuid
+
+  status String @default("trialing") // trialing, active, past_due, suspended, cancelled, expired
+
+  startedAt          DateTime  @default(now()) @map("started_at") @db.Timestamptz(6)
+  trialEndsAt        DateTime? @map("trial_ends_at") @db.Timestamptz(6)
+  currentPeriodStart DateTime  @map("current_period_start") @db.Timestamptz(6)
+  currentPeriodEnd   DateTime  @map("current_period_end") @db.Timestamptz(6)
+
+  cancelAtPeriodEnd Boolean   @default(false) @map("cancel_at_period_end")
+  cancelledAt       DateTime? @map("cancelled_at") @db.Timestamptz(6)
+
+  suspendedAt        DateTime? @map("suspended_at") @db.Timestamptz(6)
+  pastDueAt          DateTime? @map("past_due_at") @db.Timestamptz(6)
+  lastGraceWarningAt DateTime? @map("last_grace_warning_at") @db.Timestamptz(6)
+
+  pendingPlanId          String?   @map("pending_plan_id") @db.Uuid
+  pendingPlanEffectiveAt DateTime? @map("pending_plan_effective_at") @db.Timestamptz(6)
+
+  // Keep historical billing terms for this subscription cycle.
+  priceSnapshot Decimal? @map("price_snapshot") @db.Decimal(10, 2)
+  quotaSnapshot Json?    @map("quota_snapshot") @db.JsonB
+
+  // Tap recurring data
+  paymentProvider       String  @default("tap") // e.g. "tap"
+  tapCustomerId         String? @map("tap_customer_id")
+  tapCardId             String? @map("tap_card_id")
+  tapPaymentAgreementId String? @map("tap_payment_agreement_id")
+
+  // latest payment reference
+  latestPaymentId String? @map("latest_ayment_id") @db.Uuid
+
+  // recurring billing
+  billingCycle  String    @default("monthly") @map("billing_cycle") // monthly, yearly
+  nextBillingAt DateTime? @map("nextBillingAt") @db.Timestamptz(6)
+  lastBillingAt DateTime? @map("lastBillingAt") @db.Timestamptz(6)
+  retryCount    Int       @default(0) @map("retry_count") @db.SmallInt
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // relations
+  tenant        Tenant               @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  plan          Plan                 @relation(fields: [planId], references: [planId], onDelete: Restrict)
+  pendingPlan   Plan?                @relation("PendingPlan", fields: [pendingPlanId], references: [planId])
+  latestPayment SubscriptionPayment? @relation("LatestPayment", fields: [latestPaymentId], references: [paymentId])
+
+  payments SubscriptionPayment[]
+  events   SubscriptionEvent[]
+
+  @@index([status, nextBillingAt])
+  @@index([trialEndsAt])
+  @@map("tenant_subscriptions")
+}
+
+model TenantUsage {
+  usageId  String @id() @default(uuid()) @map("usage_id") @db.Uuid
+  tenantId String @unique @map("tenant_id") @db.Uuid
+
+  // quota columns
+  projectsCount Int @default(0) @map("projects_count")
+  usersCount    Int @default(0) @map("users_count")
+  sessionsCount Int @default(0) @map("sessions_count")
+  requestsCount Int @default(0) @map("requests_count")
+
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // relations
+  tenant Tenant @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+
+  @@map("tenant_usages")
+}
+
+model SubscriptionEvent {
+  eventId        String @id() @default(uuid()) @map("event_id") @db.Uuid
+  subscriptionId String @map("subscription_id") @db.Uuid
+
+  type       String // trial_started, trial_expired, payment_pending, payment_succeeded, payment_failed, renewed, upgraded, downgraded, downgrade_scheduled, cancelled, suspended, reactivated, manual_adjustment, enterprise_plan_created, enterprise_plan_updated
+  fromPlanId String? @map("fromPlanId") @db.Uuid
+  toPlanId   String? @map("toPlanId") @db.Uuid
+
+  actorUserId String? @map("actor_user_id") @db.Uuid
+  meta        Json?   @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // relations
+  subscription TenantSubscription @relation(fields: [subscriptionId], references: [subscriptionId], onDelete: Cascade)
+
+  @@map("subscription_events")
+}
