@@ -136,15 +136,14 @@ export class AuthService {
       };
     }
 
-    const [accessToken, userProfile] = await Promise.all([
-      this.jwtService.generateAccessToken({
-        userId: user.userId,
-        email: user.email,
-        role: user.role,
-        tenantId: user.tenant?.tenantId,
-      }),
-      this.usersService.getById(user.userId),
-    ]);
+    const userProfile = await this.usersService.getById(user.userId);
+
+    const accessToken = await this.jwtService.generateAccessToken({
+      userId: user.userId,
+      email: user.email,
+      role: user.role,
+      tenantId: userProfile.tenant?.tenantId,
+    });
 
     return {
       accessToken,

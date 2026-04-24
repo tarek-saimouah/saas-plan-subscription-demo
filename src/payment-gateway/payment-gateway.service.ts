@@ -31,6 +31,7 @@ export class PaymentGatewayService implements IPaymentGateway {
   async createRecurringCharge(params: {
     amount: number;
     currency: string;
+    description?: string;
     customerId: string;
     cardTokenId: string;
     paymentAgreementId: string;
@@ -60,7 +61,8 @@ export class PaymentGatewayService implements IPaymentGateway {
   async createInitialChargeWithSaveCard(params: {
     amount: number;
     currency: string;
-    customer: { firstName: string; lastName: string; email: string };
+    description?: string;
+    customer: { firstName: string; lastName?: string; email: string };
     referenceOrder: string;
     referenceTransaction: string;
     metadata: EPaymentMetadata;
@@ -81,5 +83,12 @@ export class PaymentGatewayService implements IPaymentGateway {
     }
 
     return response;
+  }
+
+  validateWebhookPayload(payload: any, postedHashString: string): boolean {
+    return this.paymentProvider.validateWebhookPayload(
+      payload,
+      postedHashString,
+    );
   }
 }

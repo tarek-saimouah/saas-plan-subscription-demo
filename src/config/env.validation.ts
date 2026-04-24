@@ -72,6 +72,9 @@ class EnvironmentVariables {
   @IsString()
   TAP_PAYMENT_REDIRECT_URL: string;
 
+  @IsString()
+  TAP_MERCHANT_ID: string;
+
   // Swagger
 
   @IsString()

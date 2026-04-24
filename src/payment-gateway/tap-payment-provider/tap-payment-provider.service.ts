@@ -20,6 +20,7 @@ export class TapPaymentGatewayService {
   private TAP_PAYMENT_API_KEY: string;
   private TAP_PAYMENT_WEBHOOK_URL: string;
   private TAP_PAYMENT_REDIRECT_URL: string;
+  private TAP_MERCHANT_ID: string;
 
   constructor(
     private readonly config: ConfigService,
@@ -33,6 +34,7 @@ export class TapPaymentGatewayService {
     this.TAP_PAYMENT_REDIRECT_URL = this.config.get(
       'TAP_PAYMENT_REDIRECT_URL',
     )!;
+    this.TAP_MERCHANT_ID = this.config.get('TAP_MERCHANT_ID')!;
   }
 
   async createCardToken(
@@ -88,12 +90,14 @@ export class TapPaymentGatewayService {
     const requestPayload: ChargeRequestPayload = {
       amount: payload.amount,
       currency: payload.currency,
+      description: payload.description,
       customer_initiated: true,
       threeDSecure: true,
       save_card: false,
       metadata: payload.metadata,
       receipt: {
-        email: true,
+        email: false,
+        sms: false,
       },
       customer: {
         first_name: payload.customer.firstName,
@@ -102,6 +106,9 @@ export class TapPaymentGatewayService {
       },
       source: {
         id: 'src_card', // for cards
+      },
+      merchant: {
+        id: this.TAP_MERCHANT_ID,
       },
       redirect: {
         url: this.TAP_PAYMENT_REDIRECT_URL,
@@ -156,7 +163,8 @@ export class TapPaymentGatewayService {
         id: payload.paymentAgreementId,
       },
       receipt: {
-        email: true,
+        email: false,
+        sms: false,
       },
       customer: {
         id: payload.customerId,
@@ -168,6 +176,9 @@ export class TapPaymentGatewayService {
       reference: {
         order: payload.referenceOrder,
         transaction: payload.referenceTransaction,
+      },
+      merchant: {
+        id: this.TAP_MERCHANT_ID,
       },
       redirect: {
         url: this.TAP_PAYMENT_REDIRECT_URL,
@@ -216,12 +227,14 @@ export class TapPaymentGatewayService {
     const requestPayload: ChargeRequestPayload = {
       amount: payload.amount,
       currency: payload.currency,
+      description: payload.description,
       customer_initiated: true,
       threeDSecure: true,
-      save_card: true,
+      save_card: true, // set to true to return payment agreement, card and customer details for upcoming recurring payments
       metadata: payload.metadata,
       receipt: {
-        email: true,
+        email: false,
+        sms: false,
       },
       customer: {
         first_name: payload.customer.firstName,
@@ -234,6 +247,9 @@ export class TapPaymentGatewayService {
       reference: {
         order: payload.referenceOrder,
         transaction: payload.referenceTransaction,
+      },
+      merchant: {
+        id: this.TAP_MERCHANT_ID,
       },
       redirect: {
         url: this.TAP_PAYMENT_REDIRECT_URL,
@@ -304,10 +320,7 @@ export class TapPaymentGatewayService {
     }
   }
 
-  async validateWebhookPayload(
-    payload: any,
-    postedHashString: string,
-  ): Promise<boolean> {
+  validateWebhookPayload(payload: any, postedHashString: string): boolean {
     const id = payload.id;
     // round amount to currency required decimal places
     const amount = this.formatMoneyAmount(payload.amount, payload.currency);

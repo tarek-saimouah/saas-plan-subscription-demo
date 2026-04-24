@@ -4,6 +4,7 @@ export interface IPaymentGateway {
   createRecurringCharge(params: {
     amount: number;
     currency: string;
+    description?: string;
     customerId: string;
     cardTokenId: string;
     paymentAgreementId: string;
@@ -18,7 +19,7 @@ export interface IPaymentGateway {
     currency: string;
     customer: {
       firstName: string;
-      lastName: string;
+      lastName?: string;
       email: string;
     };
     referenceOrder: string;

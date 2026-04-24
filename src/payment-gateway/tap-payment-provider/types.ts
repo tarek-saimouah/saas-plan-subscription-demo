@@ -166,9 +166,10 @@ export interface CardTokenResponse {
 export interface CreateChargePayload {
   amount: number;
   currency: string;
+  description?: string;
   customer: {
     firstName: string;
-    lastName: string;
+    lastName?: string;
     email: string;
   };
   metadata: EPaymentMetadata;
@@ -213,14 +214,14 @@ export interface ChargeRequestPayload {
   };
   customer: {
     first_name: string;
-    last_name: string;
+    last_name?: string;
     email: string;
     phone?: {
       country_code: string;
       number: string;
     };
   };
-  merchant?: {
+  merchant: {
     id: string;
   };
   source: {
@@ -259,7 +260,7 @@ export interface RecurringChargeRequestPayload {
     transaction: string;
     order: string;
   };
-  merchant?: {
+  merchant: {
     id: string;
   };
   post: {
@@ -282,4 +283,132 @@ export enum PaymentChargeStatusEnum {
   VOID = 'VOID',
   TIMEDOUT = 'TIMEDOUT',
   UNKNOWN = 'UNKNOWN',
+}
+
+// webhook event
+
+export interface TapWebhookEvent {
+  id: string;
+  object: string;
+  live_mode: boolean;
+  customer_initiated: boolean;
+  api_version: string;
+  method: string;
+  status: PaymentChargeStatusEnum;
+  amount: number;
+  currency: string;
+  threeDSecure: boolean;
+  card_threeDSecure: boolean;
+  save_card: boolean;
+  merchant_id: string;
+  product: string;
+  description: string;
+  metadata: EPaymentMetadata;
+  transaction: {
+    timezone: string;
+    created: string;
+    expiry: {
+      period: number;
+      type: string;
+    };
+    asynchronous: boolean;
+    amount: number;
+    currency: string;
+  };
+  reference: {
+    track: string;
+    payment: string;
+    gateway: string;
+    acquirer: string;
+    transaction: string;
+    order: string;
+  };
+  response: {
+    code: string;
+    message: string;
+  };
+  security: {
+    threeDSecure: {
+      status: string;
+    };
+  };
+  gateway: {
+    response: {
+      code: string;
+      message: string;
+    };
+  };
+  card: {
+    id: string;
+    object: string;
+    first_six: string;
+    first_eight: string;
+    scheme: string;
+    brand: string;
+    last_four: string;
+  };
+  receipt: {
+    id: string;
+    email: boolean;
+    sms: boolean;
+  };
+  customer: {
+    id: string;
+    first_name: string;
+    middle_name: string;
+    last_name: string;
+    email: string;
+    phone: {
+      country_code: string;
+      number: string;
+    };
+  };
+  merchant: {
+    country: string;
+    currency: string;
+    id: string;
+  };
+  source: {
+    object: string;
+    type: string;
+    payment_type: string;
+    payment_method: string;
+    channel: string;
+    id: string;
+  };
+  redirect: {
+    status: string;
+    url: string;
+  };
+  post: {
+    attempt: number;
+    status: string;
+    url: string;
+  };
+  activities: Array<{
+    id: string;
+    object: string;
+    created: number;
+    status: string;
+    currency: string;
+    amount: number;
+    remarks: string;
+  }>;
+  auto_reversed: boolean;
+  payment_agreement: {
+    id: string;
+    amount_variability: string;
+    type: string;
+    total_payments_count: number;
+    contract: {
+      id: string;
+      customer_id: string;
+      type: string;
+    };
+    metadata: {
+      txn_type: string;
+      txn_id: string;
+      terminal_id: string;
+    };
+  };
 }

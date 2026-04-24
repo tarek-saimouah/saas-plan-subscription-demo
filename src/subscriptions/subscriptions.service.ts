@@ -11,6 +11,7 @@ import {
   PaymentStatusEnum,
   SubscriptionEventTypeEnum,
   SubscriptionStatusEnum,
+  getEndOfDay,
 } from 'src/common';
 import { PrismaService } from 'src/database';
 import { Prisma } from 'src/generated/prisma/client';
@@ -61,6 +62,11 @@ export class SubscriptionsService {
         new Date().setDate(now.getDate() + trialPlan.trialDays),
       );
 
+      // optional: if you want to set trial end to the end of the last day
+      // const trialEndsAt = getEndOfDay(
+      //   new Date(new Date().setDate(now.getDate() + trialPlan.trialDays)),
+      // );
+
       const subscription = await tx.tenantSubscription.create({
         data: {
           tenantId: tenant.tenantId,
@@ -106,8 +112,7 @@ export class SubscriptionsService {
     description?: string;
     monthlyPrice: number;
     yearlyPrice: number;
-    currency?: `${CurrencyEnum}`;
-    billingCycle?: `${BillingCycleEnum}`;
+    currency?: string;
     quotas: {
       maxProjects: number;
       maxUsers: number;
@@ -187,7 +192,7 @@ export class SubscriptionsService {
   async requestUpgradeToPaidPlan(params: {
     tenantId: string;
     planId: string;
-    billingCycle: `${BillingCycleEnum}`;
+    billingCycle: BillingCycleEnum;
     providerPaymentRef?: string;
   }) {
     return this.prisma.$transaction(async (tx) => {
@@ -254,7 +259,7 @@ export class SubscriptionsService {
         subscriptionId: subscription.subscriptionId,
         plan: newPlan,
         amount:
-          params.billingCycle === 'monthly'
+          params.billingCycle === BillingCycleEnum.MONTHLY
             ? newPlan.monthlyPrice.toNumber()
             : newPlan.yearlyPrice.toNumber(),
         currency: newPlan.currency,
@@ -267,9 +272,12 @@ export class SubscriptionsService {
     provider: string;
     providerEventId: string;
     providerPaymentRef?: string;
+    tapCardId: string;
+    tapCustomerId: string;
+    tapPaymentAgreementId: string;
     amount: number;
-    currency: `${CurrencyEnum}`;
-    billingCycle: `${BillingCycleEnum}`;
+    currency: string;
+    billingCycle: BillingCycleEnum;
     rawPayload?: Prisma.JsonValue;
   }) {
     return this.prisma.$transaction(async (tx) => {
@@ -299,6 +307,11 @@ export class SubscriptionsService {
         subscription.billingCycle === BillingCycleEnum.YEARLY ? 365 : 30;
       const newEnd = new Date(new Date().setDate(now.getDate() + periodDays));
 
+      // optional: if you want to set end date to the end of the last day
+      // const newEnd = getEndOfDay(
+      //   new Date(new Date().setDate(now.getDate() + periodDays)),
+      // );
+
       const payment = await tx.subscriptionPayment.create({
         data: {
           subscriptionId: subscription.subscriptionId,
@@ -325,7 +338,7 @@ export class SubscriptionsService {
       let priceSnapshot = subscription.priceSnapshot;
       if (activePlan?.monthlyPrice) {
         priceSnapshot =
-          params.billingCycle === 'monthly'
+          params.billingCycle === BillingCycleEnum.MONTHLY
             ? activePlan.monthlyPrice
             : activePlan.yearlyPrice;
       }
@@ -348,6 +361,9 @@ export class SubscriptionsService {
           pendingPlanEffectiveAt: null,
           latestPaymentId: payment.paymentId,
           paymentProvider: params.provider,
+          tapCardId: params.tapCardId,
+          tapCustomerId: params.tapCustomerId,
+          tapPaymentAgreementId: params.tapPaymentAgreementId,
           priceSnapshot,
           quotaSnapshot: activePlan
             ? ({
@@ -386,7 +402,7 @@ export class SubscriptionsService {
   async upgradeNowWithFullAmount(params: {
     tenantId: string;
     targetPlanId: string;
-    billingCycle: `${BillingCycleEnum}`;
+    billingCycle: BillingCycleEnum;
   }) {
     const subscription = await this.prisma.tenantSubscription.findUnique({
       where: { tenantId: params.tenantId },
@@ -416,7 +432,9 @@ export class SubscriptionsService {
       );
     }
 
-    if (targetPlan.monthlyPrice <= subscription.plan.monthlyPrice) {
+    if (
+      targetPlan.monthlyPrice.lessThanOrEqualTo(subscription.plan.monthlyPrice)
+    ) {
       throw new BadRequestException('Not an upgrade');
     }
 
@@ -426,7 +444,7 @@ export class SubscriptionsService {
       fromPlan: subscription.plan,
       toPlan: targetPlan,
       amount:
-        params.billingCycle === 'monthly'
+        params.billingCycle === BillingCycleEnum.MONTHLY
           ? targetPlan.monthlyPrice.toNumber()
           : targetPlan.yearlyPrice.toNumber(),
       currency: targetPlan.currency,

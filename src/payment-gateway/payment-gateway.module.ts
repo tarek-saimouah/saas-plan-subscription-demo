@@ -5,7 +5,7 @@ import { TapPaymentGatewayService } from './tap-payment-provider';
 
 @Module({
   imports: [HttpModule],
-  providers: [PaymentGatewayService, TapPaymentGatewayService],
   exports: [PaymentGatewayService],
+  providers: [PaymentGatewayService, TapPaymentGatewayService],
 })
 export class PaymentGatewayModule {}
