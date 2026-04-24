@@ -10,6 +10,7 @@ export enum SubscriptionEventTypeEnum {
   DOWNGRADE_SCHEDULED = 'downgrade_scheduled',
   CANCELLED = 'cancelled',
   SUSPENDED = 'suspended',
+  PAST_DUE = 'past_due',
   REACTIVATED = 'reactivated',
   MANUAL_ADJUSTMENT = 'manual_adjustment',
   ENTERPRISE_PLAN_CREATED = 'enterprise_plan_created',

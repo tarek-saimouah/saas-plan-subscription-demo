@@ -352,7 +352,7 @@ export class SubscriptionsService {
           currentPeriodEnd: newEnd,
           nextBillingAt: newEnd,
           lastBillingAt: now,
-          retryCount: 0,
+          retryCount: 0, // reset recurring payment retry count
           cancelAtPeriodEnd: false,
           cancelledAt: null,
           suspendedAt: null,
@@ -361,9 +361,15 @@ export class SubscriptionsService {
           pendingPlanEffectiveAt: null,
           latestPaymentId: payment.paymentId,
           paymentProvider: params.provider,
-          tapCardId: params.tapCardId,
-          tapCustomerId: params.tapCustomerId,
-          tapPaymentAgreementId: params.tapPaymentAgreementId,
+          ...(params.tapCardId && {
+            tapCardId: params.tapCardId,
+          }),
+          ...(params.tapCustomerId && {
+            tapCustomerId: params.tapCustomerId,
+          }),
+          ...(params.tapPaymentAgreementId && {
+            tapPaymentAgreementId: params.tapPaymentAgreementId,
+          }),
           priceSnapshot,
           quotaSnapshot: activePlan
             ? ({
@@ -579,6 +585,11 @@ export class SubscriptionsService {
 
       if (existingSubscription) return existingSubscription;
 
+      // check if retry count exceeded 3
+      if (subscription.retryCount >= 3) {
+        return subscription;
+      }
+
       const now = new Date();
 
       const payment = await tx.subscriptionPayment.create({
@@ -603,7 +614,8 @@ export class SubscriptionsService {
           status: SubscriptionStatusEnum.ACTIVE,
           pastDueAt: now,
           lastGraceWarningAt: now,
-          retryCount: 0,
+          // increment retry count
+          retryCount: { increment: 1 },
           latestPaymentId: payment.paymentId,
         },
       });
@@ -628,21 +640,36 @@ export class SubscriptionsService {
     const now = new Date();
 
     // 3 days after failed renewal -> PAST_DUE
-    await this.prisma.tenantSubscription.updateMany({
-      where: {
-        status: SubscriptionStatusEnum.ACTIVE,
-        pastDueAt: { not: null },
-        updatedAt: {
-          lte: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+    const pastDueSubs =
+      await this.prisma.tenantSubscription.updateManyAndReturn({
+        where: {
+          status: SubscriptionStatusEnum.ACTIVE,
+          pastDueAt: { not: null },
+          updatedAt: {
+            lte: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+          },
         },
-      },
-      data: {
-        status: SubscriptionStatusEnum.PAST_DUE,
-      },
-    });
+        data: {
+          status: SubscriptionStatusEnum.PAST_DUE,
+        },
+      });
+
+    this.logger.info({ pastDueCount: pastDueSubs.length });
+
+    if (pastDueSubs?.length) {
+      await this.prisma.subscriptionEvent.createMany({
+        data: pastDueSubs.map((sub) => {
+          return {
+            subscriptionId: sub.subscriptionId,
+            type: SubscriptionEventTypeEnum.PAST_DUE,
+            fromPlanId: sub.planId,
+          };
+        }),
+      });
+    }
 
     // 7 days after failure -> SUSPENDED
-    await this.prisma.tenantSubscription.updateMany({
+    const suspended = await this.prisma.tenantSubscription.updateManyAndReturn({
       where: {
         status: SubscriptionStatusEnum.PAST_DUE,
         pastDueAt: { not: null },
@@ -654,6 +681,20 @@ export class SubscriptionsService {
         status: SubscriptionStatusEnum.SUSPENDED,
       },
     });
+
+    this.logger.info({ suspendedCount: suspended.length });
+
+    if (suspended?.length) {
+      await this.prisma.subscriptionEvent.createMany({
+        data: suspended.map((sub) => {
+          return {
+            subscriptionId: sub.subscriptionId,
+            type: SubscriptionEventTypeEnum.SUSPENDED,
+            fromPlanId: sub.planId,
+          };
+        }),
+      });
+    }
   }
 
   async resubscribe(tenantId: string) {
@@ -687,6 +728,7 @@ export class SubscriptionsService {
           suspendedAt: null,
           pastDueAt: null,
           cancelAtPeriodEnd: false,
+          retryCount: 0, // reset recurring payment retry count
         },
       });
 

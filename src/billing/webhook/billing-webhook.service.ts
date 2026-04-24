@@ -25,8 +25,9 @@ export class BillingWebhookService {
     const amount = event.amount;
     const currency = event.currency ?? 'USD';
     const tapPaymentAgreementId = event.payment_agreement.id;
-    const tapCardId = event.card.id;
-    const tapCustomerId = event.customer.id;
+    const tapCardId = event.card.id || event.payment_agreement.contract.id;
+    const tapCustomerId =
+      event.customer.id || event.payment_agreement.contract.customer_id;
 
     const tenantId = event.metadata.tenantId;
     if (!tenantId) {
@@ -39,17 +40,28 @@ export class BillingWebhookService {
     this.logger.info({ subscription });
 
     if (event.status === PaymentChargeStatusEnum.CAPTURED) {
-      await this.subscriptionsService.activateAfterSuccessfulPayment({
+      // await this.subscriptionsService.activateAfterSuccessfulPayment({
+      //   tenantId,
+      //   provider: 'tap',
+      //   providerEventId: String(eventId),
+      //   providerPaymentRef: String(paymentRef),
+      //   tapPaymentAgreementId: String(tapPaymentAgreementId),
+      //   tapCardId: String(tapCardId),
+      //   tapCustomerId: String(tapCustomerId),
+      //   amount: Number(amount),
+      //   currency: String(currency),
+      //   billingCycle: subscription.billingCycle as BillingCycleEnum,
+      //   rawPayload: event as any,
+      // });
+
+      // return { ok: true };
+
+      await this.subscriptionsService.markPaymentFailed({
         tenantId,
-        provider: 'tap',
         providerEventId: String(eventId),
-        providerPaymentRef: String(paymentRef),
-        tapPaymentAgreementId: String(tapPaymentAgreementId),
-        tapCardId: String(tapCardId),
-        tapCustomerId: String(tapCustomerId),
         amount: Number(amount),
         currency: String(currency),
-        billingCycle: subscription.billingCycle as BillingCycleEnum,
+        failureReason: event.response.message ?? 'Payment failed',
         rawPayload: event as any,
       });
 

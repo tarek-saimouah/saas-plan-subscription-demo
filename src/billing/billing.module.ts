@@ -6,10 +6,11 @@ import { SubscriptionsModule } from 'src/subscriptions/subscriptions.module';
 import { PaymentGatewayModule } from 'src/payment-gateway/payment-gateway.module';
 import { BillingWebhookController } from './webhook/billing-webhook.controller';
 import { BillingWebhookService } from './webhook/billing-webhook.service';
+import { BillingCronService } from './billing-cron.service';
 
 @Module({
   imports: [PlansModule, SubscriptionsModule, PaymentGatewayModule],
-  providers: [BillingService, BillingWebhookService],
+  providers: [BillingService, BillingWebhookService, BillingCronService],
   controllers: [BillingController, BillingWebhookController],
 })
 export class BillingModule {}

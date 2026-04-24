@@ -49,7 +49,7 @@ export class TapPaymentGatewayService {
     const requestPayload = {
       saved_card: {
         card_id: payload.cardId,
-        customerId: payload.customerId,
+        customer_id: payload.customerId,
       },
     };
 

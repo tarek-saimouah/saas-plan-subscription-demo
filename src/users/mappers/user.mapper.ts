@@ -19,7 +19,7 @@ export class UserMapper {
   }
 
   entityToResponseDto(entity: UserEntity): UserResponseDto {
-    const { password, verificationCode, tenant, ...rest } = entity;
+    const { tenant, ...rest } = entity;
     const tenantResponse = tenant
       ? this.tenantMapper.entityToResponseDto(tenant)
       : null;

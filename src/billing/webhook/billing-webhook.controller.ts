@@ -28,8 +28,7 @@ export class BillingWebhookController {
     const sig = req.headers['hashstring'] as string;
     const payload = req.body;
 
-    console.log('event webhook');
-    console.log({ sig, payload });
+    console.log(`event webhook with id ${payload?.id}`);
 
     try {
       const verified = this.paymentGatewayService.validateWebhookPayload(

@@ -15,6 +15,7 @@ import { PlansModule } from './plans/plans.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
 import { BillingModule } from './billing/billing.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -43,6 +44,8 @@ import { BillingModule } from './billing/billing.module';
     PrismaModule,
     // jwt
     CustomJwtModule,
+    // cronjobs
+    ScheduleModule.forRoot(),
 
     PaymentGatewayModule,
 

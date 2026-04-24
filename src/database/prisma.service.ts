@@ -20,6 +20,13 @@ export class PrismaService
     super({
       // attach adapter
       adapter,
+      omit: {
+        user: {
+          // never return password or verificationCode in queries
+          password: true,
+          verificationCode: true,
+        },
+      },
     });
   }
 
