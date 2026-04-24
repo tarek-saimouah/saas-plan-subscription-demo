@@ -106,6 +106,9 @@ export class PlansController {
     type: ErrorResponseDto,
     description: 'When trying to update free plan prices',
   })
+  @ApiConflictResponse({
+    type: ErrorResponseDto,
+  })
   // permissions
   @Roles(['admin'])
   @Patch(':id')

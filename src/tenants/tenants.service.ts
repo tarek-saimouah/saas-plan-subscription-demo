@@ -9,14 +9,22 @@ import {
 import { TenantMapper } from './mappers';
 
 import { PrismaService } from 'src/database';
-import { CreateTenantDto, GetTenantDto, TenantResponseDto } from './dto';
+import {
+  CreateTenantDto,
+  GetTenantDto,
+  SubscriptionUsageResponseDto,
+  TenantResponseDto,
+} from './dto';
 import { Prisma } from 'src/generated/prisma/client';
+import { SubscriptionResponseDto } from 'src/subscriptions/dto';
+import { SubscriptionMapper } from 'src/subscriptions/mappers';
 
 @Injectable()
 export class TenantsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenantMapper: TenantMapper,
+    private readonly subscriptionMapper: SubscriptionMapper,
   ) {}
 
   async create(
@@ -100,5 +108,49 @@ export class TenantsService {
     );
 
     return new PagingDataResponse(data, meta);
+  }
+
+  async getSubscription(tenantId: string): Promise<SubscriptionResponseDto> {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: {
+        tenantId,
+      },
+      select: {
+        subscription: true,
+      },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
+    if (!tenant.subscription) {
+      throw new NotFoundException('Subscription not found');
+    }
+
+    return this.subscriptionMapper.entityToResponseDto(
+      this.subscriptionMapper.modelToEntity(tenant.subscription),
+    );
+  }
+
+  async getUsage(tenantId: string): Promise<SubscriptionUsageResponseDto> {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: {
+        tenantId,
+      },
+      select: {
+        usage: true,
+      },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
+    if (!tenant.usage) {
+      throw new NotFoundException('Usage not found');
+    }
+
+    return tenant.usage;
   }
 }

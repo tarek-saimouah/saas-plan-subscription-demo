@@ -93,10 +93,9 @@ export class SubscriptionGuard implements CanActivate {
 
       if (
         subscriptionMeta.requireOwnEnterprisePlan &&
-        subscription.plan.kind === PlanKindEnum.ENTERPRISE_CUSTOM &&
         subscription.plan.tenantId !== decodedUser.tenantId
       ) {
-        throw new ForbiddenException('Not your enterprise plan');
+        throw new ForbiddenException('Require own enterprise plan');
       }
 
       const now = new Date();
