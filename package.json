@@ -1,8 +1,8 @@
 {
-  "name": "plan-subscription-demo",
+  "name": "saas-plan-subscription-demo",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "demo for SaaS plans/subscriptions implementation",
+  "author": "Tarek Saimouah",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
