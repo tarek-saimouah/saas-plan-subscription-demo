@@ -1,8 +1,11 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiExcludeEndpoint,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -14,12 +17,17 @@ import {
   DecodedUser,
   ErrorResponseDto,
   JwtDecodedEntity,
+  MessageResponseDto,
   Public,
   Roles,
 } from 'src/common';
 import { PlanUserResponseDto } from 'src/plans';
 import { PlansService } from 'src/plans/plans.service';
-import { UpgradePlanDto, UpgradePlanResponseDto } from './dto';
+import {
+  DowngradePlanDto,
+  UpgradePlanDto,
+  UpgradePlanResponseDto,
+} from './dto';
 import { BillingService } from './billing.service';
 
 @ApiInternalServerErrorResponse({ type: ErrorResponseDto })
@@ -51,10 +59,13 @@ export class BillingController {
     description: 'upgrade plan',
   })
   @ApiCreatedDataResponse(UpgradePlanResponseDto)
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+  })
   // permissions
   @Roles(['user'])
   @Post('plan-upgrade')
-  async create(
+  async upgradePlan(
     @Body() payload: UpgradePlanDto,
     @DecodedUser() decodedUser: JwtDecodedEntity,
   ): Promise<DataResponse<UpgradePlanResponseDto>> {
@@ -63,5 +74,35 @@ export class BillingController {
       payload,
     );
     return new DataResponse(created);
+  }
+
+  @ApiOperation({
+    summary: 'Roles: (user)',
+    description: 'downgrade plan',
+  })
+  @ApiResponse({ type: MessageResponseDto })
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+  })
+  // permissions
+  @Roles(['user'])
+  @Post('plan-downgrade')
+  downgradePlan(
+    @Body() payload: DowngradePlanDto,
+    @DecodedUser() decodedUser: JwtDecodedEntity,
+  ): Promise<MessageResponseDto> {
+    return this.billingService.secheduleDowngradePlan(
+      decodedUser.tenantId!,
+      payload,
+    );
+  }
+
+  // this endpoint is just to view a message after charge redirect
+  @ApiExcludeEndpoint()
+  // permissions
+  @Public()
+  @Get('after-charge')
+  afterCharge() {
+    return '<h1>Thanks for subscription!<h1>';
   }
 }

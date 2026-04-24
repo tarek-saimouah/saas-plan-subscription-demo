@@ -17,8 +17,52 @@ export class BillingCronService {
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
-  async processDueRecurringPayments() {
-    this.logger.info(`Cron ${new Date()} run: processDueRecurringPayments`);
+  async processDueBilling(): Promise<void> {
+    // 1) apply scheduled downgrades first
+    await this.applyScheduledDowngrades();
+
+    // 2) then process renewals using the updated active plan
+    await this.processDueRenewals();
+  }
+
+  private async applyScheduledDowngrades() {
+    const now = new Date();
+
+    const dueSubscriptions = await this.prisma.tenantSubscription.findMany({
+      where: {
+        status: SubscriptionStatusEnum.ACTIVE,
+        pendingPlanId: { not: null },
+        pendingPlanEffectiveAt: {
+          lte: now,
+        },
+      },
+      include: {
+        plan: true,
+        pendingPlan: true,
+      },
+    });
+
+    for (const subscription of dueSubscriptions) {
+      if (!subscription.pendingPlan) {
+        continue;
+      }
+
+      try {
+        await this.subscriptionsService.applyScheduledDowngrade({
+          tenantId: subscription.tenantId,
+          subscriptionId: subscription.subscriptionId,
+        });
+      } catch (error) {
+        this.logger.error(
+          `apply scheduled downgrade failed for ${subscription.subscriptionId}`,
+          error,
+        );
+      }
+    }
+  }
+
+  private async processDueRenewals() {
+    this.logger.info(`Cron ${new Date()} run: processDueRenewals`);
 
     const now = new Date();
 

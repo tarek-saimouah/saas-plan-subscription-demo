@@ -40,28 +40,17 @@ export class BillingWebhookService {
     this.logger.info({ subscription });
 
     if (event.status === PaymentChargeStatusEnum.CAPTURED) {
-      // await this.subscriptionsService.activateAfterSuccessfulPayment({
-      //   tenantId,
-      //   provider: 'tap',
-      //   providerEventId: String(eventId),
-      //   providerPaymentRef: String(paymentRef),
-      //   tapPaymentAgreementId: String(tapPaymentAgreementId),
-      //   tapCardId: String(tapCardId),
-      //   tapCustomerId: String(tapCustomerId),
-      //   amount: Number(amount),
-      //   currency: String(currency),
-      //   billingCycle: subscription.billingCycle as BillingCycleEnum,
-      //   rawPayload: event as any,
-      // });
-
-      // return { ok: true };
-
-      await this.subscriptionsService.markPaymentFailed({
+      await this.subscriptionsService.activateAfterSuccessfulPayment({
         tenantId,
+        provider: 'tap',
         providerEventId: String(eventId),
+        providerPaymentRef: String(paymentRef),
+        tapPaymentAgreementId: String(tapPaymentAgreementId),
+        tapCardId: String(tapCardId),
+        tapCustomerId: String(tapCustomerId),
         amount: Number(amount),
         currency: String(currency),
-        failureReason: event.response.message ?? 'Payment failed',
+        billingCycle: subscription.billingCycle as BillingCycleEnum,
         rawPayload: event as any,
       });
 

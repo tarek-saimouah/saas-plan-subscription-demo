@@ -405,6 +405,82 @@ export class SubscriptionsService {
     });
   }
 
+  async markPaymentFailed(params: {
+    tenantId: string;
+    providerEventId: string;
+    amount: number;
+    currency: string;
+    failureReason?: string;
+    rawPayload?: Prisma.JsonValue;
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      const subscription = await tx.tenantSubscription.findUnique({
+        where: { tenantId: params.tenantId },
+      });
+
+      this.logger.info({ subscription });
+
+      if (!subscription) throw new NotFoundException('Subscription not found');
+
+      const existingSubscription = await tx.subscriptionPayment.findUnique({
+        where: { providerEventId: params.providerEventId },
+      });
+
+      this.logger.info({ existingSubscription });
+
+      if (existingSubscription) return existingSubscription;
+
+      // check if retry count exceeded 3
+      if (subscription.retryCount >= 3) {
+        return subscription;
+      }
+
+      const now = new Date();
+
+      const payment = await tx.subscriptionPayment.create({
+        data: {
+          subscriptionId: subscription.subscriptionId,
+          provider: 'tap',
+          providerEventId: params.providerEventId,
+          amount: params.amount,
+          currency: params.currency,
+          status: PaymentStatusEnum.FAILED,
+          rawPayload: params.rawPayload ?? undefined,
+          failedAt: now,
+          failureReason: params.failureReason,
+        },
+      });
+
+      this.logger.info({ payment });
+
+      await tx.tenantSubscription.update({
+        where: { tenantId: params.tenantId },
+        data: {
+          status: SubscriptionStatusEnum.ACTIVE,
+          pastDueAt: now,
+          lastGraceWarningAt: now,
+          // increment retry count
+          retryCount: { increment: 1 },
+          latestPaymentId: payment.paymentId,
+        },
+      });
+
+      await tx.subscriptionEvent.create({
+        data: {
+          subscriptionId: subscription.subscriptionId,
+          type: SubscriptionEventTypeEnum.PAYMENT_FAILED,
+          fromPlanId: subscription.planId,
+          meta: {
+            providerEventId: params.providerEventId,
+            reason: params.failureReason,
+          },
+        },
+      });
+
+      return payment;
+    });
+  }
+
   async upgradeNowWithFullAmount(params: {
     tenantId: string;
     targetPlanId: string;
@@ -527,6 +603,68 @@ export class SubscriptionsService {
     });
   }
 
+  async applyScheduledDowngrade(params: {
+    tenantId: string;
+    subscriptionId: string;
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      const subscription = await tx.tenantSubscription.findUnique({
+        where: {
+          subscriptionId: params.subscriptionId,
+          tenantId: params.tenantId,
+        },
+        include: { plan: true, pendingPlan: true },
+      });
+
+      this.logger.info({ subscription });
+
+      if (!subscription || !subscription.pendingPlan) {
+        return;
+      }
+
+      const newPlan = subscription.pendingPlan;
+
+      const newPrice =
+        subscription.billingCycle === BillingCycleEnum.MONTHLY
+          ? newPlan.monthlyPrice.toNumber()
+          : newPlan.yearlyPrice.toNumber();
+
+      await this.prisma.$transaction(async (tx) => {
+        const updated = await tx.tenantSubscription.update({
+          where: { subscriptionId: subscription.subscriptionId },
+          data: {
+            planId: newPlan.planId,
+            pendingPlanId: null,
+            pendingPlanEffectiveAt: null,
+            priceSnapshot: newPrice,
+            quotaSnapshot: {
+              maxProjects: newPlan.maxProjects,
+              maxUsers: newPlan.maxUsers,
+              maxSessions: newPlan.maxSessions,
+              maxRequests: newPlan.maxRequests,
+            },
+          },
+        });
+
+        await tx.subscriptionEvent.create({
+          data: {
+            subscriptionId: subscription.subscriptionId,
+            type: SubscriptionEventTypeEnum.DOWNGRADED,
+            fromPlanId: subscription.planId,
+            toPlanId: newPlan.planId,
+            meta: {
+              appliedAt: new Date(),
+            },
+          },
+        });
+
+        this.logger.info(
+          `Downgrade applied for subscription ${updated.subscriptionId} to plan ${newPlan.planId}`,
+        );
+      });
+    });
+  }
+
   async cancelSubscription(tenantId: string) {
     return this.prisma.$transaction(async (tx) => {
       const subscription = await tx.tenantSubscription.findUnique({
@@ -557,82 +695,6 @@ export class SubscriptionsService {
       });
 
       return updated;
-    });
-  }
-
-  async markPaymentFailed(params: {
-    tenantId: string;
-    providerEventId: string;
-    amount: number;
-    currency: string;
-    failureReason?: string;
-    rawPayload?: Prisma.JsonValue;
-  }) {
-    return this.prisma.$transaction(async (tx) => {
-      const subscription = await tx.tenantSubscription.findUnique({
-        where: { tenantId: params.tenantId },
-      });
-
-      this.logger.info({ subscription });
-
-      if (!subscription) throw new NotFoundException('Subscription not found');
-
-      const existingSubscription = await tx.subscriptionPayment.findUnique({
-        where: { providerEventId: params.providerEventId },
-      });
-
-      this.logger.info({ existingSubscription });
-
-      if (existingSubscription) return existingSubscription;
-
-      // check if retry count exceeded 3
-      if (subscription.retryCount >= 3) {
-        return subscription;
-      }
-
-      const now = new Date();
-
-      const payment = await tx.subscriptionPayment.create({
-        data: {
-          subscriptionId: subscription.subscriptionId,
-          provider: 'tap',
-          providerEventId: params.providerEventId,
-          amount: params.amount,
-          currency: params.currency,
-          status: PaymentStatusEnum.FAILED,
-          rawPayload: params.rawPayload ?? undefined,
-          failedAt: now,
-          failureReason: params.failureReason,
-        },
-      });
-
-      this.logger.info({ payment });
-
-      await tx.tenantSubscription.update({
-        where: { tenantId: params.tenantId },
-        data: {
-          status: SubscriptionStatusEnum.ACTIVE,
-          pastDueAt: now,
-          lastGraceWarningAt: now,
-          // increment retry count
-          retryCount: { increment: 1 },
-          latestPaymentId: payment.paymentId,
-        },
-      });
-
-      await tx.subscriptionEvent.create({
-        data: {
-          subscriptionId: subscription.subscriptionId,
-          type: SubscriptionEventTypeEnum.PAYMENT_FAILED,
-          fromPlanId: subscription.planId,
-          meta: {
-            providerEventId: params.providerEventId,
-            reason: params.failureReason,
-          },
-        },
-      });
-
-      return payment;
     });
   }
 
@@ -679,6 +741,7 @@ export class SubscriptionsService {
       },
       data: {
         status: SubscriptionStatusEnum.SUSPENDED,
+        suspendedAt: now,
       },
     });
 
