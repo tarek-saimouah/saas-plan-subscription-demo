@@ -233,23 +233,37 @@ export class EnterprisePlanRequestsService {
         },
       });
 
-      await tx.subscriptionEvent
-        .create({
-          data: {
-            subscriptionId: tenant.subscription?.subscriptionId ?? '',
-            type: SubscriptionEventTypeEnum.ENTERPRISE_PLAN_CREATED,
-            toPlanId: plan.planId,
-            actorUserId: params.adminUserId,
-            meta: {
+      // create events
+
+      await Promise.all([
+        tx.enterprisePlanRequestEvent
+          .create({
+            data: {
               requestId: request.requestId,
-              tenantId: request.tenantId,
-              monthlyPrice: plan.monthlyPrice,
-              yearlyPrice: plan.yearlyPrice,
-              currency: plan.currency,
-            } as any,
-          },
-        })
-        .catch(() => undefined);
+              type: EnterprisePlanRequestEventTypeEnum.REVIEWED,
+              actorUserId: params.adminUserId,
+              meta: params.payload as any,
+            },
+          })
+          .catch(() => undefined),
+        tx.subscriptionEvent
+          .create({
+            data: {
+              subscriptionId: tenant.subscription?.subscriptionId ?? '',
+              type: SubscriptionEventTypeEnum.ENTERPRISE_PLAN_CREATED,
+              toPlanId: plan.planId,
+              actorUserId: params.adminUserId,
+              meta: {
+                requestId: request.requestId,
+                tenantId: request.tenantId,
+                monthlyPrice: plan.monthlyPrice,
+                yearlyPrice: plan.yearlyPrice,
+                currency: plan.currency,
+              } as any,
+            },
+          })
+          .catch(() => undefined),
+      ]);
 
       return {
         request: approvedRequest,

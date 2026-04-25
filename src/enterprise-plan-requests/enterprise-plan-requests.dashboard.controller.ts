@@ -22,6 +22,8 @@ import {
   GetEnterprisePlanRequestDto,
   EnterprisePlanRequestResponseDto,
   ReviewEnterprisePlanRequestDto,
+  GetEnterprisePlanRequestEventDto,
+  EnterprisePlanRequestEventResponseDto,
 } from './dto';
 import {
   ApiCreatedDataResponse,
@@ -37,6 +39,7 @@ import {
 } from 'src/common';
 import { EnterprisePlanRequestsService } from './enterprise-plan-requests.service';
 import { CreateEnterprisePlanDto } from 'src/plans';
+import { EnterprisePlanRequestEventsService } from './enterprise-plan-request-events.service';
 
 @ApiInternalServerErrorResponse({ type: ErrorResponseDto })
 @ApiUnauthorizedResponse({ type: ErrorResponseDto })
@@ -46,6 +49,7 @@ import { CreateEnterprisePlanDto } from 'src/plans';
 export class EnterprisePlanRequestsDashboardController {
   constructor(
     private readonly enterprisePlanRequestsService: EnterprisePlanRequestsService,
+    private readonly enterprisePlanRequestEventsService: EnterprisePlanRequestEventsService,
   ) {}
 
   @ApiOperation({
@@ -61,6 +65,24 @@ export class EnterprisePlanRequestsDashboardController {
     @Query() paginationParams?: PaginationParams,
   ): Promise<IPaginatedResult<EnterprisePlanRequestResponseDto>> {
     return await this.enterprisePlanRequestsService.findAllPaging(
+      filter,
+      paginationParams,
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Roles: (admin)',
+    description: 'get enterprise plan request events paging',
+  })
+  @ApiPaginatedResponse(EnterprisePlanRequestEventResponseDto)
+  // permissions
+  @Roles(['admin'])
+  @Get('events')
+  async findAllEventsPaging(
+    @Query() filter?: GetEnterprisePlanRequestEventDto,
+    @Query() paginationParams?: PaginationParams,
+  ): Promise<IPaginatedResult<EnterprisePlanRequestEventResponseDto>> {
+    return await this.enterprisePlanRequestEventsService.findAllPaging(
       filter,
       paginationParams,
     );

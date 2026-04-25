@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import {
   CreateEnterprisePlanRequestDto,
+  EnterprisePlanRequestEventResponseDto,
   EnterprisePlanRequestResponseDto,
 } from './dto';
 import {
@@ -34,6 +35,7 @@ import {
   Roles,
 } from 'src/common';
 import { EnterprisePlanRequestsService } from './enterprise-plan-requests.service';
+import { EnterprisePlanRequestEventsService } from './enterprise-plan-request-events.service';
 
 @ApiInternalServerErrorResponse({ type: ErrorResponseDto })
 @ApiUnauthorizedResponse({ type: ErrorResponseDto })
@@ -44,6 +46,7 @@ import { EnterprisePlanRequestsService } from './enterprise-plan-requests.servic
 export class EnterprisePlanRequestsController {
   constructor(
     private readonly enterprisePlanRequestsService: EnterprisePlanRequestsService,
+    private readonly enterprisePlanRequestEventsService: EnterprisePlanRequestEventsService,
   ) {}
 
   @ApiOperation({
@@ -105,5 +108,24 @@ export class EnterprisePlanRequestsController {
         decodedUser.tenantId!,
       );
     return new DataResponse(enterprisePlanRequest);
+  }
+
+  @ApiOperation({
+    summary: 'Roles: (user)',
+    description: 'get enterprise plan request events paging',
+  })
+  @ApiPaginatedResponse(EnterprisePlanRequestEventResponseDto)
+  // permissions
+  @Roles(['user'])
+  @Get(':id/events')
+  async findAllEventsPaging(
+    @Param('id') id: string,
+    @DecodedUser() decodedUser: JwtDecodedEntity,
+    @Query() paginationParams?: PaginationParams,
+  ): Promise<IPaginatedResult<EnterprisePlanRequestEventResponseDto>> {
+    return await this.enterprisePlanRequestEventsService.findAllPaging(
+      { requestId: id, tenantId: decodedUser.tenantId! },
+      paginationParams,
+    );
   }
 }
