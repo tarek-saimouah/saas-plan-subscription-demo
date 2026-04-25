@@ -12,13 +12,17 @@ import {
   UpdateTenantDto,
 } from './dto';
 import { MessageResponseDto, SuccessResponseDto } from 'src/common';
-import { Plan } from 'src/generated/prisma/client';
+import {
+  SubscriptionUsageLimitsService,
+  UsageQuotakey,
+} from 'src/subscriptions';
 
 @Injectable()
 export class TenantProfilesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenantMapper: TenantMapper,
+    private readonly usageLimitsService: SubscriptionUsageLimitsService,
   ) {}
 
   async update(
@@ -84,11 +88,7 @@ export class TenantProfilesService {
   // increment usage
   async tenantSubscriptionUse(params: {
     tenantId: string;
-    quotaUsageKey:
-      | 'projectsCount'
-      | 'usersCount'
-      | 'sessionsCount'
-      | 'requestsCount';
+    usageQuotaKey: UsageQuotakey;
   }): Promise<SubscriptionUsageResponseDto> {
     const subscription = await this.prisma.tenantSubscription.findUnique({
       where: { tenantId: params.tenantId },
@@ -111,35 +111,20 @@ export class TenantProfilesService {
     //  - background jobs
     //  - internal service calls
 
-    const limit = this.getQuotaLimit(subscription.plan, params.quotaUsageKey);
-    const current = usage[params.quotaUsageKey];
-
-    if (limit !== null && limit !== undefined && current >= limit) {
-      throw new ForbiddenException(`Quota exceeded: ${params.quotaUsageKey}`);
-    }
+    this.usageLimitsService.isLimitExceeded({
+      plan: subscription.plan,
+      usage,
+      usageKey: params.usageQuotaKey,
+    });
 
     // increment projects
     const updatedUsage = await this.prisma.tenantUsage.update({
       where: { tenantId: params.tenantId },
       data: {
-        [params.quotaUsageKey]: { increment: 1 },
+        [params.usageQuotaKey]: { increment: 1 },
       },
     });
 
     return updatedUsage;
-  }
-
-  private getQuotaLimit(
-    plan: Plan,
-    key: 'projectsCount' | 'usersCount' | 'sessionsCount' | 'requestsCount',
-  ): number {
-    const mapping: Record<string, number> = {
-      projectsCount: plan.maxProjects ?? 0,
-      usersCount: plan.maxUsers ?? 0,
-      sessionsCount: plan.maxSessions ?? 0,
-      requestsCount: plan.maxRequests ?? 0,
-    };
-
-    return mapping[key];
   }
 }

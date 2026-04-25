@@ -16,6 +16,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
 import { BillingModule } from './billing/billing.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     PlansModule,
     SubscriptionsModule,
     BillingModule,
+    PaymentsModule,
   ],
   controllers: [],
   providers: [

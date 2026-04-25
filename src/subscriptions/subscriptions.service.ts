@@ -12,14 +12,22 @@ import {
   SubscriptionEventTypeEnum,
   SubscriptionStatusEnum,
   getEndOfDay,
+  PaginationParams,
+  IPaginatedResult,
+  getPaginationArgs,
+  getPaginationMeta,
+  PagingDataResponse,
 } from 'src/common';
 import { PrismaService } from 'src/database';
 import { Prisma } from 'src/generated/prisma/client';
+import { GetSubscriptionDto, SubscriptionResponseDto } from './dto';
+import { SubscriptionMapper } from './mappers';
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly subscriptionMapper: SubscriptionMapper,
     @InjectPinoLogger(SubscriptionsService.name)
     private readonly logger: PinoLogger,
   ) {}
@@ -62,7 +70,7 @@ export class SubscriptionsService {
         new Date().setDate(now.getDate() + trialPlan.trialDays),
       );
 
-      // optional: if you want to set trial end to the end of the last day
+      // optional: if the requirement is to set trial end to the end of the last day
       // const trialEndsAt = getEndOfDay(
       //   new Date(new Date().setDate(now.getDate() + trialPlan.trialDays)),
       // );
@@ -170,23 +178,6 @@ export class SubscriptionsService {
       // rather than SubscriptionEvent, because the subscription may not exist yet.
       return plan;
     });
-  }
-
-  async getSubscriptionByTenantId(tenantId: string) {
-    const subscription = await this.prisma.tenantSubscription.findUnique({
-      where: { tenantId },
-      include: {
-        plan: true,
-        payments: true,
-        events: true,
-      },
-    });
-
-    if (!subscription) {
-      throw new NotFoundException('Subscription not found');
-    }
-
-    return subscription;
   }
 
   async requestUpgradeToPaidPlan(params: {
@@ -307,7 +298,7 @@ export class SubscriptionsService {
         subscription.billingCycle === BillingCycleEnum.YEARLY ? 365 : 30;
       const newEnd = new Date(new Date().setDate(now.getDate() + periodDays));
 
-      // optional: if you want to set end date to the end of the last day
+      // optional: if the requirement is to set end date to the end of the last day
       // const newEnd = getEndOfDay(
       //   new Date(new Date().setDate(now.getDate() + periodDays)),
       // );
@@ -812,5 +803,75 @@ export class SubscriptionsService {
 
       return { success: true };
     });
+  }
+
+  async getSubscriptionByTenantId(tenantId: string) {
+    const subscription = await this.prisma.tenantSubscription.findUnique({
+      where: { tenantId },
+      include: {
+        plan: true,
+        payments: true,
+        events: true,
+      },
+    });
+
+    if (!subscription) {
+      throw new NotFoundException('Subscription not found');
+    }
+
+    return subscription;
+  }
+
+  // controller methods
+
+  async getById(subscriptionId: string): Promise<SubscriptionResponseDto> {
+    const result = await this.prisma.tenantSubscription.findUnique({
+      where: {
+        subscriptionId,
+      },
+    });
+
+    if (!result) {
+      throw new NotFoundException('Subscription not found');
+    }
+
+    return this.subscriptionMapper.entityToResponseDto(
+      this.subscriptionMapper.modelToEntity(result),
+    );
+  }
+
+  async findAllPaging(
+    filter?: GetSubscriptionDto,
+    pagingArgs?: PaginationParams,
+  ): Promise<IPaginatedResult<SubscriptionResponseDto>> {
+    const query: Prisma.TenantSubscriptionWhereInput = {
+      ...filter,
+    };
+
+    const orderBy: Prisma.TenantSubscriptionOrderByWithAggregationInput = {
+      createdAt: 'desc',
+    };
+
+    const { take, skip } = getPaginationArgs(pagingArgs);
+
+    const [results, total] = await this.prisma.$transaction([
+      this.prisma.tenantSubscription.findMany({
+        where: query,
+        orderBy,
+        skip,
+        take,
+      }),
+      this.prisma.tenantSubscription.count({ where: query }),
+    ]);
+
+    const meta = getPaginationMeta(total, pagingArgs);
+
+    const data = results.map((res) =>
+      this.subscriptionMapper.entityToResponseDto(
+        this.subscriptionMapper.modelToEntity(res),
+      ),
+    );
+
+    return new PagingDataResponse(data, meta);
   }
 }

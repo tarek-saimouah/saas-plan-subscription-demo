@@ -9,18 +9,19 @@ import {
   SUBSCRIPTION_KEY,
   SubscriptionRequirement,
 } from '../decorators/require-subscription.decorator';
-import { QUOTA_KEY, QuotaKey } from '../decorators/require-quota.decorator';
+import { QUOTA_KEY } from '../decorators/require-quota.decorator';
 import { PUBLIC_KEY } from '../decorators/public.decorator';
 import { PrismaService } from 'src/database';
 import { JwtDecodedEntity } from '../entities';
 import { PlanKindEnum, SubscriptionStatusEnum } from '../enums';
-import { TenantUsage } from 'src/generated/prisma/client';
+import { QuotaKey, SubscriptionUsageLimitsService } from 'src/subscriptions';
 
 @Injectable()
 export class SubscriptionGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly prisma: PrismaService,
+    private readonly usageLimitsService: SubscriptionUsageLimitsService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -124,12 +125,11 @@ export class SubscriptionGuard implements CanActivate {
         throw new ForbiddenException('Usage record is missing');
       }
 
-      const limit = subscription.plan[quotaKey];
-      const current = this.getUsageValue(usage, quotaKey);
-
-      if (limit !== null && limit !== undefined && current >= limit) {
-        throw new ForbiddenException(`Quota exceeded: ${quotaKey}`);
-      }
+      this.usageLimitsService.isLimitExceeded({
+        plan: subscription.plan,
+        usage,
+        quotaKey,
+      });
     }
 
     return true;
@@ -154,16 +154,5 @@ export class SubscriptionGuard implements CanActivate {
       default:
         return false;
     }
-  }
-
-  private getUsageValue(usage: TenantUsage, key: QuotaKey): number {
-    const mapping: Record<QuotaKey, number> = {
-      maxProjects: usage.projectsCount ?? 0,
-      maxUsers: usage.usersCount ?? 0,
-      maxSessions: usage.sessionsCount ?? 0,
-      maxRequests: usage.requestsCount ?? 0,
-    };
-
-    return mapping[key];
   }
 }

@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { TenantsService } from './tenants.service';
@@ -23,11 +24,14 @@ import {
 import {
   ApiCreatedDataResponse,
   ApiDataResponse,
+  ApiPaginatedResponse,
   DataResponse,
   DecodedUser,
   ErrorResponseDto,
+  IPaginatedResult,
   JwtDecodedEntity,
   MessageResponseDto,
+  PaginationParams,
   RequireQuota,
   RequireSubscription,
   Roles,
@@ -39,7 +43,13 @@ import {
   UpdateTenantDto,
 } from './dto';
 import { TenantProfilesService } from './tenant-profiles.service';
-import { SubscriptionResponseDto } from 'src/subscriptions/dto';
+import {
+  SubscriptionEventResponseDto,
+  SubscriptionResponseDto,
+} from 'src/subscriptions/dto';
+import { PaymentResponseDto } from 'src/payments/dto';
+import { PaymentsService } from 'src/payments/payments.service';
+import { SubscriptionEventsService } from 'src/subscriptions/subscription-events.service';
 
 @ApiInternalServerErrorResponse({ type: ErrorResponseDto })
 @ApiUnauthorizedResponse({ type: ErrorResponseDto })
@@ -51,6 +61,8 @@ export class TenantsController {
   constructor(
     private readonly tenantsService: TenantsService,
     private readonly tenantProfilesService: TenantProfilesService,
+    private readonly paymentsService: PaymentsService,
+    private readonly subscriptionEventsService: SubscriptionEventsService,
   ) {}
 
   @ApiOperation({
@@ -135,6 +147,56 @@ export class TenantsController {
 
   @ApiOperation({
     summary: 'Roles: (user)',
+    description: 'Get payments (paging)',
+  })
+  @ApiPaginatedResponse(PaymentResponseDto)
+  // permissions
+  @UseGuards(SubscriptionGuard)
+  @RequireSubscription({
+    allowTrial: true,
+    allowActive: true,
+    allowPastDue: true,
+    allowSuspended: true,
+  })
+  @Roles(['user'])
+  @Get('subscription/payments')
+  findAllPaymentsPaging(
+    @DecodedUser() decodedUser: JwtDecodedEntity,
+    @Query() pagingArgs?: PaginationParams,
+  ): Promise<IPaginatedResult<PaymentResponseDto>> {
+    return this.paymentsService.findAllPaging(
+      { tenantId: decodedUser.tenantId! },
+      pagingArgs,
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Roles: (user)',
+    description: 'Get payments (paging)',
+  })
+  @ApiPaginatedResponse(SubscriptionEventResponseDto)
+  // permissions
+  @UseGuards(SubscriptionGuard)
+  @RequireSubscription({
+    allowTrial: true,
+    allowActive: true,
+    allowPastDue: true,
+    allowSuspended: true,
+  })
+  @Roles(['user'])
+  @Get('subscription/events')
+  findAllEventsPaging(
+    @DecodedUser() decodedUser: JwtDecodedEntity,
+    @Query() pagingArgs?: PaginationParams,
+  ): Promise<IPaginatedResult<SubscriptionEventResponseDto>> {
+    return this.subscriptionEventsService.findAllPaging(
+      { tenantId: decodedUser.tenantId! },
+      pagingArgs,
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Roles: (user)',
     description: 'get tenant usage',
   })
   @ApiDataResponse(SubscriptionUsageResponseDto)
@@ -207,7 +269,7 @@ export class TenantsController {
   ): Promise<DataResponse<SubscriptionUsageResponseDto>> {
     const result = await this.tenantProfilesService.tenantSubscriptionUse({
       tenantId: decodedUser.tenantId!,
-      quotaUsageKey: 'projectsCount',
+      usageQuotaKey: 'projectsCount',
     });
     return new DataResponse(result);
   }
@@ -235,7 +297,7 @@ export class TenantsController {
   ): Promise<DataResponse<SubscriptionUsageResponseDto>> {
     const result = await this.tenantProfilesService.tenantSubscriptionUse({
       tenantId: decodedUser.tenantId!,
-      quotaUsageKey: 'usersCount',
+      usageQuotaKey: 'usersCount',
     });
     return new DataResponse(result);
   }
@@ -263,7 +325,7 @@ export class TenantsController {
   ): Promise<DataResponse<SubscriptionUsageResponseDto>> {
     const result = await this.tenantProfilesService.tenantSubscriptionUse({
       tenantId: decodedUser.tenantId!,
-      quotaUsageKey: 'sessionsCount',
+      usageQuotaKey: 'sessionsCount',
     });
     return new DataResponse(result);
   }
@@ -291,7 +353,7 @@ export class TenantsController {
   ): Promise<DataResponse<SubscriptionUsageResponseDto>> {
     const result = await this.tenantProfilesService.tenantSubscriptionUse({
       tenantId: decodedUser.tenantId!,
-      quotaUsageKey: 'requestsCount',
+      usageQuotaKey: 'requestsCount',
     });
     return new DataResponse(result);
   }
