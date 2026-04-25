@@ -557,6 +557,7 @@ export class SubscriptionsService {
           currentPeriodEnd: newEnd,
           nextBillingAt: newEnd,
           lastBillingAt: now,
+          billingCycle: params.billingCycle,
           retryCount: 0, // reset recurring payment retry count
           cancelAtPeriodEnd: false,
           cancelledAt: null,
