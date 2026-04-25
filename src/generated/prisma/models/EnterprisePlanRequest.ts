@@ -27,17 +27,17 @@ export type AggregateEnterprisePlanRequest = {
 }
 
 export type EnterprisePlanRequestAvgAggregateOutputType = {
-  expectedproducts: number | null
-  expectedusers: number | null
-  expectedsessions: number | null
-  expectedrequests: number | null
+  expectedProjects: number | null
+  expectedUsers: number | null
+  expectedSessions: number | null
+  expectedRequests: number | null
 }
 
 export type EnterprisePlanRequestSumAggregateOutputType = {
-  expectedproducts: number | null
-  expectedusers: number | null
-  expectedsessions: number | null
-  expectedrequests: number | null
+  expectedProjects: number | null
+  expectedUsers: number | null
+  expectedSessions: number | null
+  expectedRequests: number | null
 }
 
 export type EnterprisePlanRequestMinAggregateOutputType = {
@@ -45,10 +45,10 @@ export type EnterprisePlanRequestMinAggregateOutputType = {
   tenantId: string | null
   title: string | null
   description: string | null
-  expectedproducts: number | null
-  expectedusers: number | null
-  expectedsessions: number | null
-  expectedrequests: number | null
+  expectedProjects: number | null
+  expectedUsers: number | null
+  expectedSessions: number | null
+  expectedRequests: number | null
   status: string | null
   adminNotes: string | null
   createdAt: Date | null
@@ -60,10 +60,10 @@ export type EnterprisePlanRequestMaxAggregateOutputType = {
   tenantId: string | null
   title: string | null
   description: string | null
-  expectedproducts: number | null
-  expectedusers: number | null
-  expectedsessions: number | null
-  expectedrequests: number | null
+  expectedProjects: number | null
+  expectedUsers: number | null
+  expectedSessions: number | null
+  expectedRequests: number | null
   status: string | null
   adminNotes: string | null
   createdAt: Date | null
@@ -75,10 +75,10 @@ export type EnterprisePlanRequestCountAggregateOutputType = {
   tenantId: number
   title: number
   description: number
-  expectedproducts: number
-  expectedusers: number
-  expectedsessions: number
-  expectedrequests: number
+  expectedProjects: number
+  expectedUsers: number
+  expectedSessions: number
+  expectedRequests: number
   status: number
   adminNotes: number
   createdAt: number
@@ -88,17 +88,17 @@ export type EnterprisePlanRequestCountAggregateOutputType = {
 
 
 export type EnterprisePlanRequestAvgAggregateInputType = {
-  expectedproducts?: true
-  expectedusers?: true
-  expectedsessions?: true
-  expectedrequests?: true
+  expectedProjects?: true
+  expectedUsers?: true
+  expectedSessions?: true
+  expectedRequests?: true
 }
 
 export type EnterprisePlanRequestSumAggregateInputType = {
-  expectedproducts?: true
-  expectedusers?: true
-  expectedsessions?: true
-  expectedrequests?: true
+  expectedProjects?: true
+  expectedUsers?: true
+  expectedSessions?: true
+  expectedRequests?: true
 }
 
 export type EnterprisePlanRequestMinAggregateInputType = {
@@ -106,10 +106,10 @@ export type EnterprisePlanRequestMinAggregateInputType = {
   tenantId?: true
   title?: true
   description?: true
-  expectedproducts?: true
-  expectedusers?: true
-  expectedsessions?: true
-  expectedrequests?: true
+  expectedProjects?: true
+  expectedUsers?: true
+  expectedSessions?: true
+  expectedRequests?: true
   status?: true
   adminNotes?: true
   createdAt?: true
@@ -121,10 +121,10 @@ export type EnterprisePlanRequestMaxAggregateInputType = {
   tenantId?: true
   title?: true
   description?: true
-  expectedproducts?: true
-  expectedusers?: true
-  expectedsessions?: true
-  expectedrequests?: true
+  expectedProjects?: true
+  expectedUsers?: true
+  expectedSessions?: true
+  expectedRequests?: true
   status?: true
   adminNotes?: true
   createdAt?: true
@@ -136,10 +136,10 @@ export type EnterprisePlanRequestCountAggregateInputType = {
   tenantId?: true
   title?: true
   description?: true
-  expectedproducts?: true
-  expectedusers?: true
-  expectedsessions?: true
-  expectedrequests?: true
+  expectedProjects?: true
+  expectedUsers?: true
+  expectedSessions?: true
+  expectedRequests?: true
   status?: true
   adminNotes?: true
   createdAt?: true
@@ -238,10 +238,10 @@ export type EnterprisePlanRequestGroupByOutputType = {
   tenantId: string
   title: string
   description: string
-  expectedproducts: number | null
-  expectedusers: number | null
-  expectedsessions: number | null
-  expectedrequests: number | null
+  expectedProjects: number | null
+  expectedUsers: number | null
+  expectedSessions: number | null
+  expectedRequests: number | null
   status: string
   adminNotes: string | null
   createdAt: Date
@@ -276,15 +276,16 @@ export type EnterprisePlanRequestWhereInput = {
   tenantId?: Prisma.UuidFilter<"EnterprisePlanRequest"> | string
   title?: Prisma.StringFilter<"EnterprisePlanRequest"> | string
   description?: Prisma.StringFilter<"EnterprisePlanRequest"> | string
-  expectedproducts?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
-  expectedusers?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
-  expectedsessions?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
-  expectedrequests?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedProjects?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedUsers?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedSessions?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedRequests?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
   status?: Prisma.StringFilter<"EnterprisePlanRequest"> | string
   adminNotes?: Prisma.StringNullableFilter<"EnterprisePlanRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"EnterprisePlanRequest"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"EnterprisePlanRequest"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  events?: Prisma.EnterprisePlanRequestEventListRelationFilter
 }
 
 export type EnterprisePlanRequestOrderByWithRelationInput = {
@@ -292,15 +293,16 @@ export type EnterprisePlanRequestOrderByWithRelationInput = {
   tenantId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  expectedproducts?: Prisma.SortOrderInput | Prisma.SortOrder
-  expectedusers?: Prisma.SortOrderInput | Prisma.SortOrder
-  expectedsessions?: Prisma.SortOrderInput | Prisma.SortOrder
-  expectedrequests?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedProjects?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedUsers?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedSessions?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedRequests?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   adminNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
+  events?: Prisma.EnterprisePlanRequestEventOrderByRelationAggregateInput
 }
 
 export type EnterprisePlanRequestWhereUniqueInput = Prisma.AtLeast<{
@@ -311,15 +313,16 @@ export type EnterprisePlanRequestWhereUniqueInput = Prisma.AtLeast<{
   tenantId?: Prisma.UuidFilter<"EnterprisePlanRequest"> | string
   title?: Prisma.StringFilter<"EnterprisePlanRequest"> | string
   description?: Prisma.StringFilter<"EnterprisePlanRequest"> | string
-  expectedproducts?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
-  expectedusers?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
-  expectedsessions?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
-  expectedrequests?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedProjects?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedUsers?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedSessions?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedRequests?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
   status?: Prisma.StringFilter<"EnterprisePlanRequest"> | string
   adminNotes?: Prisma.StringNullableFilter<"EnterprisePlanRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"EnterprisePlanRequest"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"EnterprisePlanRequest"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  events?: Prisma.EnterprisePlanRequestEventListRelationFilter
 }, "requestId">
 
 export type EnterprisePlanRequestOrderByWithAggregationInput = {
@@ -327,10 +330,10 @@ export type EnterprisePlanRequestOrderByWithAggregationInput = {
   tenantId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  expectedproducts?: Prisma.SortOrderInput | Prisma.SortOrder
-  expectedusers?: Prisma.SortOrderInput | Prisma.SortOrder
-  expectedsessions?: Prisma.SortOrderInput | Prisma.SortOrder
-  expectedrequests?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedProjects?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedUsers?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedSessions?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedRequests?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   adminNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -350,10 +353,10 @@ export type EnterprisePlanRequestScalarWhereWithAggregatesInput = {
   tenantId?: Prisma.UuidWithAggregatesFilter<"EnterprisePlanRequest"> | string
   title?: Prisma.StringWithAggregatesFilter<"EnterprisePlanRequest"> | string
   description?: Prisma.StringWithAggregatesFilter<"EnterprisePlanRequest"> | string
-  expectedproducts?: Prisma.IntNullableWithAggregatesFilter<"EnterprisePlanRequest"> | number | null
-  expectedusers?: Prisma.IntNullableWithAggregatesFilter<"EnterprisePlanRequest"> | number | null
-  expectedsessions?: Prisma.IntNullableWithAggregatesFilter<"EnterprisePlanRequest"> | number | null
-  expectedrequests?: Prisma.IntNullableWithAggregatesFilter<"EnterprisePlanRequest"> | number | null
+  expectedProjects?: Prisma.IntNullableWithAggregatesFilter<"EnterprisePlanRequest"> | number | null
+  expectedUsers?: Prisma.IntNullableWithAggregatesFilter<"EnterprisePlanRequest"> | number | null
+  expectedSessions?: Prisma.IntNullableWithAggregatesFilter<"EnterprisePlanRequest"> | number | null
+  expectedRequests?: Prisma.IntNullableWithAggregatesFilter<"EnterprisePlanRequest"> | number | null
   status?: Prisma.StringWithAggregatesFilter<"EnterprisePlanRequest"> | string
   adminNotes?: Prisma.StringNullableWithAggregatesFilter<"EnterprisePlanRequest"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"EnterprisePlanRequest"> | Date | string
@@ -364,15 +367,16 @@ export type EnterprisePlanRequestCreateInput = {
   requestId?: string
   title: string
   description: string
-  expectedproducts?: number | null
-  expectedusers?: number | null
-  expectedsessions?: number | null
-  expectedrequests?: number | null
+  expectedProjects?: number | null
+  expectedUsers?: number | null
+  expectedSessions?: number | null
+  expectedRequests?: number | null
   status?: string
   adminNotes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutEnterprisePlanRequestsInput
+  events?: Prisma.EnterprisePlanRequestEventCreateNestedManyWithoutRequestInput
 }
 
 export type EnterprisePlanRequestUncheckedCreateInput = {
@@ -380,29 +384,31 @@ export type EnterprisePlanRequestUncheckedCreateInput = {
   tenantId: string
   title: string
   description: string
-  expectedproducts?: number | null
-  expectedusers?: number | null
-  expectedsessions?: number | null
-  expectedrequests?: number | null
+  expectedProjects?: number | null
+  expectedUsers?: number | null
+  expectedSessions?: number | null
+  expectedRequests?: number | null
   status?: string
   adminNotes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  events?: Prisma.EnterprisePlanRequestEventUncheckedCreateNestedManyWithoutRequestInput
 }
 
 export type EnterprisePlanRequestUpdateInput = {
   requestId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  expectedproducts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedusers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedsessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedrequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedProjects?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedUsers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedRequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutEnterprisePlanRequestsNestedInput
+  events?: Prisma.EnterprisePlanRequestEventUpdateManyWithoutRequestNestedInput
 }
 
 export type EnterprisePlanRequestUncheckedUpdateInput = {
@@ -410,14 +416,15 @@ export type EnterprisePlanRequestUncheckedUpdateInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  expectedproducts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedusers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedsessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedrequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedProjects?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedUsers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedRequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.EnterprisePlanRequestEventUncheckedUpdateManyWithoutRequestNestedInput
 }
 
 export type EnterprisePlanRequestCreateManyInput = {
@@ -425,10 +432,10 @@ export type EnterprisePlanRequestCreateManyInput = {
   tenantId: string
   title: string
   description: string
-  expectedproducts?: number | null
-  expectedusers?: number | null
-  expectedsessions?: number | null
-  expectedrequests?: number | null
+  expectedProjects?: number | null
+  expectedUsers?: number | null
+  expectedSessions?: number | null
+  expectedRequests?: number | null
   status?: string
   adminNotes?: string | null
   createdAt?: Date | string
@@ -439,10 +446,10 @@ export type EnterprisePlanRequestUpdateManyMutationInput = {
   requestId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  expectedproducts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedusers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedsessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedrequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedProjects?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedUsers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedRequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -454,14 +461,78 @@ export type EnterprisePlanRequestUncheckedUpdateManyInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  expectedproducts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedusers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedsessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedrequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedProjects?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedUsers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedRequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type EnterprisePlanRequestCountOrderByAggregateInput = {
+  requestId?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
+  expectedProjects?: Prisma.SortOrder
+  expectedUsers?: Prisma.SortOrder
+  expectedSessions?: Prisma.SortOrder
+  expectedRequests?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  adminNotes?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+}
+
+export type EnterprisePlanRequestAvgOrderByAggregateInput = {
+  expectedProjects?: Prisma.SortOrder
+  expectedUsers?: Prisma.SortOrder
+  expectedSessions?: Prisma.SortOrder
+  expectedRequests?: Prisma.SortOrder
+}
+
+export type EnterprisePlanRequestMaxOrderByAggregateInput = {
+  requestId?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
+  expectedProjects?: Prisma.SortOrder
+  expectedUsers?: Prisma.SortOrder
+  expectedSessions?: Prisma.SortOrder
+  expectedRequests?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  adminNotes?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+}
+
+export type EnterprisePlanRequestMinOrderByAggregateInput = {
+  requestId?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
+  expectedProjects?: Prisma.SortOrder
+  expectedUsers?: Prisma.SortOrder
+  expectedSessions?: Prisma.SortOrder
+  expectedRequests?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  adminNotes?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+}
+
+export type EnterprisePlanRequestSumOrderByAggregateInput = {
+  expectedProjects?: Prisma.SortOrder
+  expectedUsers?: Prisma.SortOrder
+  expectedSessions?: Prisma.SortOrder
+  expectedRequests?: Prisma.SortOrder
+}
+
+export type EnterprisePlanRequestScalarRelationFilter = {
+  is?: Prisma.EnterprisePlanRequestWhereInput
+  isNot?: Prisma.EnterprisePlanRequestWhereInput
 }
 
 export type EnterprisePlanRequestListRelationFilter = {
@@ -474,63 +545,38 @@ export type EnterprisePlanRequestOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type EnterprisePlanRequestCountOrderByAggregateInput = {
-  requestId?: Prisma.SortOrder
-  tenantId?: Prisma.SortOrder
-  title?: Prisma.SortOrder
-  description?: Prisma.SortOrder
-  expectedproducts?: Prisma.SortOrder
-  expectedusers?: Prisma.SortOrder
-  expectedsessions?: Prisma.SortOrder
-  expectedrequests?: Prisma.SortOrder
-  status?: Prisma.SortOrder
-  adminNotes?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
+export type StringFieldUpdateOperationsInput = {
+  set?: string
 }
 
-export type EnterprisePlanRequestAvgOrderByAggregateInput = {
-  expectedproducts?: Prisma.SortOrder
-  expectedusers?: Prisma.SortOrder
-  expectedsessions?: Prisma.SortOrder
-  expectedrequests?: Prisma.SortOrder
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
-export type EnterprisePlanRequestMaxOrderByAggregateInput = {
-  requestId?: Prisma.SortOrder
-  tenantId?: Prisma.SortOrder
-  title?: Prisma.SortOrder
-  description?: Prisma.SortOrder
-  expectedproducts?: Prisma.SortOrder
-  expectedusers?: Prisma.SortOrder
-  expectedsessions?: Prisma.SortOrder
-  expectedrequests?: Prisma.SortOrder
-  status?: Prisma.SortOrder
-  adminNotes?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
-export type EnterprisePlanRequestMinOrderByAggregateInput = {
-  requestId?: Prisma.SortOrder
-  tenantId?: Prisma.SortOrder
-  title?: Prisma.SortOrder
-  description?: Prisma.SortOrder
-  expectedproducts?: Prisma.SortOrder
-  expectedusers?: Prisma.SortOrder
-  expectedsessions?: Prisma.SortOrder
-  expectedrequests?: Prisma.SortOrder
-  status?: Prisma.SortOrder
-  adminNotes?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
 }
 
-export type EnterprisePlanRequestSumOrderByAggregateInput = {
-  expectedproducts?: Prisma.SortOrder
-  expectedusers?: Prisma.SortOrder
-  expectedsessions?: Prisma.SortOrder
-  expectedrequests?: Prisma.SortOrder
+export type EnterprisePlanRequestCreateNestedOneWithoutEventsInput = {
+  create?: Prisma.XOR<Prisma.EnterprisePlanRequestCreateWithoutEventsInput, Prisma.EnterprisePlanRequestUncheckedCreateWithoutEventsInput>
+  connectOrCreate?: Prisma.EnterprisePlanRequestCreateOrConnectWithoutEventsInput
+  connect?: Prisma.EnterprisePlanRequestWhereUniqueInput
+}
+
+export type EnterprisePlanRequestUpdateOneRequiredWithoutEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.EnterprisePlanRequestCreateWithoutEventsInput, Prisma.EnterprisePlanRequestUncheckedCreateWithoutEventsInput>
+  connectOrCreate?: Prisma.EnterprisePlanRequestCreateOrConnectWithoutEventsInput
+  upsert?: Prisma.EnterprisePlanRequestUpsertWithoutEventsInput
+  connect?: Prisma.EnterprisePlanRequestWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnterprisePlanRequestUpdateToOneWithWhereWithoutEventsInput, Prisma.EnterprisePlanRequestUpdateWithoutEventsInput>, Prisma.EnterprisePlanRequestUncheckedUpdateWithoutEventsInput>
 }
 
 export type EnterprisePlanRequestCreateNestedManyWithoutTenantInput = {
@@ -575,40 +621,110 @@ export type EnterprisePlanRequestUncheckedUpdateManyWithoutTenantNestedInput = {
   deleteMany?: Prisma.EnterprisePlanRequestScalarWhereInput | Prisma.EnterprisePlanRequestScalarWhereInput[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type EnterprisePlanRequestCreateWithoutEventsInput = {
+  requestId?: string
+  title: string
+  description: string
+  expectedProjects?: number | null
+  expectedUsers?: number | null
+  expectedSessions?: number | null
+  expectedRequests?: number | null
+  status?: string
+  adminNotes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutEnterprisePlanRequestsInput
+}
+
+export type EnterprisePlanRequestUncheckedCreateWithoutEventsInput = {
+  requestId?: string
+  tenantId: string
+  title: string
+  description: string
+  expectedProjects?: number | null
+  expectedUsers?: number | null
+  expectedSessions?: number | null
+  expectedRequests?: number | null
+  status?: string
+  adminNotes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type EnterprisePlanRequestCreateOrConnectWithoutEventsInput = {
+  where: Prisma.EnterprisePlanRequestWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnterprisePlanRequestCreateWithoutEventsInput, Prisma.EnterprisePlanRequestUncheckedCreateWithoutEventsInput>
+}
+
+export type EnterprisePlanRequestUpsertWithoutEventsInput = {
+  update: Prisma.XOR<Prisma.EnterprisePlanRequestUpdateWithoutEventsInput, Prisma.EnterprisePlanRequestUncheckedUpdateWithoutEventsInput>
+  create: Prisma.XOR<Prisma.EnterprisePlanRequestCreateWithoutEventsInput, Prisma.EnterprisePlanRequestUncheckedCreateWithoutEventsInput>
+  where?: Prisma.EnterprisePlanRequestWhereInput
+}
+
+export type EnterprisePlanRequestUpdateToOneWithWhereWithoutEventsInput = {
+  where?: Prisma.EnterprisePlanRequestWhereInput
+  data: Prisma.XOR<Prisma.EnterprisePlanRequestUpdateWithoutEventsInput, Prisma.EnterprisePlanRequestUncheckedUpdateWithoutEventsInput>
+}
+
+export type EnterprisePlanRequestUpdateWithoutEventsInput = {
+  requestId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  expectedProjects?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedUsers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedRequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutEnterprisePlanRequestsNestedInput
+}
+
+export type EnterprisePlanRequestUncheckedUpdateWithoutEventsInput = {
+  requestId?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  expectedProjects?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedUsers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedRequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type EnterprisePlanRequestCreateWithoutTenantInput = {
   requestId?: string
   title: string
   description: string
-  expectedproducts?: number | null
-  expectedusers?: number | null
-  expectedsessions?: number | null
-  expectedrequests?: number | null
+  expectedProjects?: number | null
+  expectedUsers?: number | null
+  expectedSessions?: number | null
+  expectedRequests?: number | null
   status?: string
   adminNotes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  events?: Prisma.EnterprisePlanRequestEventCreateNestedManyWithoutRequestInput
 }
 
 export type EnterprisePlanRequestUncheckedCreateWithoutTenantInput = {
   requestId?: string
   title: string
   description: string
-  expectedproducts?: number | null
-  expectedusers?: number | null
-  expectedsessions?: number | null
-  expectedrequests?: number | null
+  expectedProjects?: number | null
+  expectedUsers?: number | null
+  expectedSessions?: number | null
+  expectedRequests?: number | null
   status?: string
   adminNotes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  events?: Prisma.EnterprisePlanRequestEventUncheckedCreateNestedManyWithoutRequestInput
 }
 
 export type EnterprisePlanRequestCreateOrConnectWithoutTenantInput = {
@@ -645,10 +761,10 @@ export type EnterprisePlanRequestScalarWhereInput = {
   tenantId?: Prisma.UuidFilter<"EnterprisePlanRequest"> | string
   title?: Prisma.StringFilter<"EnterprisePlanRequest"> | string
   description?: Prisma.StringFilter<"EnterprisePlanRequest"> | string
-  expectedproducts?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
-  expectedusers?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
-  expectedsessions?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
-  expectedrequests?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedProjects?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedUsers?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedSessions?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
+  expectedRequests?: Prisma.IntNullableFilter<"EnterprisePlanRequest"> | number | null
   status?: Prisma.StringFilter<"EnterprisePlanRequest"> | string
   adminNotes?: Prisma.StringNullableFilter<"EnterprisePlanRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"EnterprisePlanRequest"> | Date | string
@@ -659,10 +775,10 @@ export type EnterprisePlanRequestCreateManyTenantInput = {
   requestId?: string
   title: string
   description: string
-  expectedproducts?: number | null
-  expectedusers?: number | null
-  expectedsessions?: number | null
-  expectedrequests?: number | null
+  expectedProjects?: number | null
+  expectedUsers?: number | null
+  expectedSessions?: number | null
+  expectedRequests?: number | null
   status?: string
   adminNotes?: string | null
   createdAt?: Date | string
@@ -673,44 +789,75 @@ export type EnterprisePlanRequestUpdateWithoutTenantInput = {
   requestId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  expectedproducts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedusers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedsessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedrequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedProjects?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedUsers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedRequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.EnterprisePlanRequestEventUpdateManyWithoutRequestNestedInput
 }
 
 export type EnterprisePlanRequestUncheckedUpdateWithoutTenantInput = {
   requestId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  expectedproducts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedusers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedsessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedrequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedProjects?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedUsers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedRequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.EnterprisePlanRequestEventUncheckedUpdateManyWithoutRequestNestedInput
 }
 
 export type EnterprisePlanRequestUncheckedUpdateManyWithoutTenantInput = {
   requestId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  expectedproducts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedusers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedsessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  expectedrequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedProjects?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedUsers?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  expectedRequests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type EnterprisePlanRequestCountOutputType
+ */
+
+export type EnterprisePlanRequestCountOutputType = {
+  events: number
+}
+
+export type EnterprisePlanRequestCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  events?: boolean | EnterprisePlanRequestCountOutputTypeCountEventsArgs
+}
+
+/**
+ * EnterprisePlanRequestCountOutputType without action
+ */
+export type EnterprisePlanRequestCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EnterprisePlanRequestCountOutputType
+   */
+  select?: Prisma.EnterprisePlanRequestCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * EnterprisePlanRequestCountOutputType without action
+ */
+export type EnterprisePlanRequestCountOutputTypeCountEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EnterprisePlanRequestEventWhereInput
+}
 
 
 export type EnterprisePlanRequestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -718,15 +865,17 @@ export type EnterprisePlanRequestSelect<ExtArgs extends runtime.Types.Extensions
   tenantId?: boolean
   title?: boolean
   description?: boolean
-  expectedproducts?: boolean
-  expectedusers?: boolean
-  expectedsessions?: boolean
-  expectedrequests?: boolean
+  expectedProjects?: boolean
+  expectedUsers?: boolean
+  expectedSessions?: boolean
+  expectedRequests?: boolean
   status?: boolean
   adminNotes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  events?: boolean | Prisma.EnterprisePlanRequest$eventsArgs<ExtArgs>
+  _count?: boolean | Prisma.EnterprisePlanRequestCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["enterprisePlanRequest"]>
 
 export type EnterprisePlanRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -734,10 +883,10 @@ export type EnterprisePlanRequestSelectCreateManyAndReturn<ExtArgs extends runti
   tenantId?: boolean
   title?: boolean
   description?: boolean
-  expectedproducts?: boolean
-  expectedusers?: boolean
-  expectedsessions?: boolean
-  expectedrequests?: boolean
+  expectedProjects?: boolean
+  expectedUsers?: boolean
+  expectedSessions?: boolean
+  expectedRequests?: boolean
   status?: boolean
   adminNotes?: boolean
   createdAt?: boolean
@@ -750,10 +899,10 @@ export type EnterprisePlanRequestSelectUpdateManyAndReturn<ExtArgs extends runti
   tenantId?: boolean
   title?: boolean
   description?: boolean
-  expectedproducts?: boolean
-  expectedusers?: boolean
-  expectedsessions?: boolean
-  expectedrequests?: boolean
+  expectedProjects?: boolean
+  expectedUsers?: boolean
+  expectedSessions?: boolean
+  expectedRequests?: boolean
   status?: boolean
   adminNotes?: boolean
   createdAt?: boolean
@@ -766,19 +915,21 @@ export type EnterprisePlanRequestSelectScalar = {
   tenantId?: boolean
   title?: boolean
   description?: boolean
-  expectedproducts?: boolean
-  expectedusers?: boolean
-  expectedsessions?: boolean
-  expectedrequests?: boolean
+  expectedProjects?: boolean
+  expectedUsers?: boolean
+  expectedSessions?: boolean
+  expectedRequests?: boolean
   status?: boolean
   adminNotes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EnterprisePlanRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"requestId" | "tenantId" | "title" | "description" | "expectedproducts" | "expectedusers" | "expectedsessions" | "expectedrequests" | "status" | "adminNotes" | "createdAt" | "updatedAt", ExtArgs["result"]["enterprisePlanRequest"]>
+export type EnterprisePlanRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"requestId" | "tenantId" | "title" | "description" | "expectedProjects" | "expectedUsers" | "expectedSessions" | "expectedRequests" | "status" | "adminNotes" | "createdAt" | "updatedAt", ExtArgs["result"]["enterprisePlanRequest"]>
 export type EnterprisePlanRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  events?: boolean | Prisma.EnterprisePlanRequest$eventsArgs<ExtArgs>
+  _count?: boolean | Prisma.EnterprisePlanRequestCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EnterprisePlanRequestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -791,16 +942,17 @@ export type $EnterprisePlanRequestPayload<ExtArgs extends runtime.Types.Extensio
   name: "EnterprisePlanRequest"
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
+    events: Prisma.$EnterprisePlanRequestEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     requestId: string
     tenantId: string
     title: string
     description: string
-    expectedproducts: number | null
-    expectedusers: number | null
-    expectedsessions: number | null
-    expectedrequests: number | null
+    expectedProjects: number | null
+    expectedUsers: number | null
+    expectedSessions: number | null
+    expectedRequests: number | null
     status: string
     adminNotes: string | null
     createdAt: Date
@@ -1200,6 +1352,7 @@ readonly fields: EnterprisePlanRequestFieldRefs;
 export interface Prisma__EnterprisePlanRequestClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  events<T extends Prisma.EnterprisePlanRequest$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EnterprisePlanRequest$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnterprisePlanRequestEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1233,10 +1386,10 @@ export interface EnterprisePlanRequestFieldRefs {
   readonly tenantId: Prisma.FieldRef<"EnterprisePlanRequest", 'String'>
   readonly title: Prisma.FieldRef<"EnterprisePlanRequest", 'String'>
   readonly description: Prisma.FieldRef<"EnterprisePlanRequest", 'String'>
-  readonly expectedproducts: Prisma.FieldRef<"EnterprisePlanRequest", 'Int'>
-  readonly expectedusers: Prisma.FieldRef<"EnterprisePlanRequest", 'Int'>
-  readonly expectedsessions: Prisma.FieldRef<"EnterprisePlanRequest", 'Int'>
-  readonly expectedrequests: Prisma.FieldRef<"EnterprisePlanRequest", 'Int'>
+  readonly expectedProjects: Prisma.FieldRef<"EnterprisePlanRequest", 'Int'>
+  readonly expectedUsers: Prisma.FieldRef<"EnterprisePlanRequest", 'Int'>
+  readonly expectedSessions: Prisma.FieldRef<"EnterprisePlanRequest", 'Int'>
+  readonly expectedRequests: Prisma.FieldRef<"EnterprisePlanRequest", 'Int'>
   readonly status: Prisma.FieldRef<"EnterprisePlanRequest", 'String'>
   readonly adminNotes: Prisma.FieldRef<"EnterprisePlanRequest", 'String'>
   readonly createdAt: Prisma.FieldRef<"EnterprisePlanRequest", 'DateTime'>
@@ -1639,6 +1792,30 @@ export type EnterprisePlanRequestDeleteManyArgs<ExtArgs extends runtime.Types.Ex
    * Limit how many EnterprisePlanRequests to delete.
    */
   limit?: number
+}
+
+/**
+ * EnterprisePlanRequest.events
+ */
+export type EnterprisePlanRequest$eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EnterprisePlanRequestEvent
+   */
+  select?: Prisma.EnterprisePlanRequestEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EnterprisePlanRequestEvent
+   */
+  omit?: Prisma.EnterprisePlanRequestEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EnterprisePlanRequestEventInclude<ExtArgs> | null
+  where?: Prisma.EnterprisePlanRequestEventWhereInput
+  orderBy?: Prisma.EnterprisePlanRequestEventOrderByWithRelationInput | Prisma.EnterprisePlanRequestEventOrderByWithRelationInput[]
+  cursor?: Prisma.EnterprisePlanRequestEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EnterprisePlanRequestEventScalarFieldEnum | Prisma.EnterprisePlanRequestEventScalarFieldEnum[]
 }
 
 /**

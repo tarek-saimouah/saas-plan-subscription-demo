@@ -7,7 +7,7 @@ model Plan {
 
   kind         String  @default("standard") // standard, enterprise_custom
   // For 'standard' plans this is the public price.
-  // For 'enterprise_custom' plans this is the negotiated academy-specific price.
+  // For 'enterprise_custom' plans this is the negotiated tenant-specific price.
   monthlyPrice Decimal @map("monthly_price") @db.Decimal(10, 2)
   yearlyPrice  Decimal @map("yearly_price") @db.Decimal(10, 2)
   currency     String  @default("USD")

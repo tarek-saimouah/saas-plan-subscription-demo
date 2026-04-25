@@ -15,7 +15,7 @@ export class PlanEntity {
   readonly isActive: boolean;
 
   @ApiProperty({ type: Number })
-  sortOrder: number;
+  readonly sortOrder: number;
 
   @ApiProperty({ enum: PlanKindEnum })
   readonly kind: string; // standard, enterprise_custom

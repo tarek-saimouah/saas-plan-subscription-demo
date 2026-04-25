@@ -384,13 +384,14 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
+  EnterprisePlanRequest: 'EnterprisePlanRequest',
+  EnterprisePlanRequestEvent: 'EnterprisePlanRequestEvent',
   SubscriptionPayment: 'SubscriptionPayment',
   Plan: 'Plan',
   TenantSubscription: 'TenantSubscription',
   TenantUsage: 'TenantUsage',
   SubscriptionEvent: 'SubscriptionEvent',
   Tenant: 'Tenant',
-  EnterprisePlanRequest: 'EnterprisePlanRequest',
   User: 'User'
 } as const
 
@@ -407,10 +408,158 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "subscriptionPayment" | "plan" | "tenantSubscription" | "tenantUsage" | "subscriptionEvent" | "tenant" | "enterprisePlanRequest" | "user"
+    modelProps: "enterprisePlanRequest" | "enterprisePlanRequestEvent" | "subscriptionPayment" | "plan" | "tenantSubscription" | "tenantUsage" | "subscriptionEvent" | "tenant" | "user"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
+    EnterprisePlanRequest: {
+      payload: Prisma.$EnterprisePlanRequestPayload<ExtArgs>
+      fields: Prisma.EnterprisePlanRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EnterprisePlanRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EnterprisePlanRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.EnterprisePlanRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EnterprisePlanRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
+        }
+        findMany: {
+          args: Prisma.EnterprisePlanRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>[]
+        }
+        create: {
+          args: Prisma.EnterprisePlanRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
+        }
+        createMany: {
+          args: Prisma.EnterprisePlanRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EnterprisePlanRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.EnterprisePlanRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
+        }
+        update: {
+          args: Prisma.EnterprisePlanRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.EnterprisePlanRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EnterprisePlanRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EnterprisePlanRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.EnterprisePlanRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.EnterprisePlanRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEnterprisePlanRequest>
+        }
+        groupBy: {
+          args: Prisma.EnterprisePlanRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnterprisePlanRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EnterprisePlanRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnterprisePlanRequestCountAggregateOutputType> | number
+        }
+      }
+    }
+    EnterprisePlanRequestEvent: {
+      payload: Prisma.$EnterprisePlanRequestEventPayload<ExtArgs>
+      fields: Prisma.EnterprisePlanRequestEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EnterprisePlanRequestEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EnterprisePlanRequestEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestEventPayload>
+        }
+        findFirst: {
+          args: Prisma.EnterprisePlanRequestEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EnterprisePlanRequestEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestEventPayload>
+        }
+        findMany: {
+          args: Prisma.EnterprisePlanRequestEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestEventPayload>[]
+        }
+        create: {
+          args: Prisma.EnterprisePlanRequestEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestEventPayload>
+        }
+        createMany: {
+          args: Prisma.EnterprisePlanRequestEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EnterprisePlanRequestEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestEventPayload>[]
+        }
+        delete: {
+          args: Prisma.EnterprisePlanRequestEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestEventPayload>
+        }
+        update: {
+          args: Prisma.EnterprisePlanRequestEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.EnterprisePlanRequestEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EnterprisePlanRequestEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EnterprisePlanRequestEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.EnterprisePlanRequestEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestEventPayload>
+        }
+        aggregate: {
+          args: Prisma.EnterprisePlanRequestEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEnterprisePlanRequestEvent>
+        }
+        groupBy: {
+          args: Prisma.EnterprisePlanRequestEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnterprisePlanRequestEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EnterprisePlanRequestEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnterprisePlanRequestEventCountAggregateOutputType> | number
+        }
+      }
+    }
     SubscriptionPayment: {
       payload: Prisma.$SubscriptionPaymentPayload<ExtArgs>
       fields: Prisma.SubscriptionPaymentFieldRefs
@@ -855,80 +1004,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    EnterprisePlanRequest: {
-      payload: Prisma.$EnterprisePlanRequestPayload<ExtArgs>
-      fields: Prisma.EnterprisePlanRequestFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.EnterprisePlanRequestFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.EnterprisePlanRequestFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
-        }
-        findFirst: {
-          args: Prisma.EnterprisePlanRequestFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.EnterprisePlanRequestFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
-        }
-        findMany: {
-          args: Prisma.EnterprisePlanRequestFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>[]
-        }
-        create: {
-          args: Prisma.EnterprisePlanRequestCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
-        }
-        createMany: {
-          args: Prisma.EnterprisePlanRequestCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.EnterprisePlanRequestCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>[]
-        }
-        delete: {
-          args: Prisma.EnterprisePlanRequestDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
-        }
-        update: {
-          args: Prisma.EnterprisePlanRequestUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
-        }
-        deleteMany: {
-          args: Prisma.EnterprisePlanRequestDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.EnterprisePlanRequestUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.EnterprisePlanRequestUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>[]
-        }
-        upsert: {
-          args: Prisma.EnterprisePlanRequestUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnterprisePlanRequestPayload>
-        }
-        aggregate: {
-          args: Prisma.EnterprisePlanRequestAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateEnterprisePlanRequest>
-        }
-        groupBy: {
-          args: Prisma.EnterprisePlanRequestGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.EnterprisePlanRequestGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.EnterprisePlanRequestCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.EnterprisePlanRequestCountAggregateOutputType> | number
-        }
-      }
-    }
     User: {
       payload: Prisma.$UserPayload<ExtArgs>
       fields: Prisma.UserFieldRefs
@@ -1040,6 +1115,38 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const EnterprisePlanRequestScalarFieldEnum = {
+  requestId: 'requestId',
+  tenantId: 'tenantId',
+  title: 'title',
+  description: 'description',
+  expectedProjects: 'expectedProjects',
+  expectedUsers: 'expectedUsers',
+  expectedSessions: 'expectedSessions',
+  expectedRequests: 'expectedRequests',
+  status: 'status',
+  adminNotes: 'adminNotes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EnterprisePlanRequestScalarFieldEnum = (typeof EnterprisePlanRequestScalarFieldEnum)[keyof typeof EnterprisePlanRequestScalarFieldEnum]
+
+
+export const EnterprisePlanRequestEventScalarFieldEnum = {
+  eventId: 'eventId',
+  requestId: 'requestId',
+  type: 'type',
+  fromPlanId: 'fromPlanId',
+  toPlanId: 'toPlanId',
+  actorUserId: 'actorUserId',
+  meta: 'meta',
+  createdAt: 'createdAt'
+} as const
+
+export type EnterprisePlanRequestEventScalarFieldEnum = (typeof EnterprisePlanRequestEventScalarFieldEnum)[keyof typeof EnterprisePlanRequestEventScalarFieldEnum]
 
 
 export const SubscriptionPaymentScalarFieldEnum = {
@@ -1158,24 +1265,6 @@ export const TenantScalarFieldEnum = {
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
 
 
-export const EnterprisePlanRequestScalarFieldEnum = {
-  requestId: 'requestId',
-  tenantId: 'tenantId',
-  title: 'title',
-  description: 'description',
-  expectedproducts: 'expectedproducts',
-  expectedusers: 'expectedusers',
-  expectedsessions: 'expectedsessions',
-  expectedrequests: 'expectedrequests',
-  status: 'status',
-  adminNotes: 'adminNotes',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type EnterprisePlanRequestScalarFieldEnum = (typeof EnterprisePlanRequestScalarFieldEnum)[keyof typeof EnterprisePlanRequestScalarFieldEnum]
-
-
 export const UserScalarFieldEnum = {
   userId: 'userId',
   email: 'email',
@@ -1216,6 +1305,14 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -1223,14 +1320,6 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
 
@@ -1254,30 +1343,16 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
- * Reference to a field of type 'Decimal'
+ * Reference to a field of type 'Int'
  */
-export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
     
 
 
 /**
- * Reference to a field of type 'Decimal[]'
+ * Reference to a field of type 'Int[]'
  */
-export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
-    
-
-
-/**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -1296,23 +1371,37 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -1424,13 +1513,14 @@ export type PrismaClientOptions = ({
   comments?: runtime.SqlCommenterPlugin[]
 }
 export type GlobalOmitConfig = {
+  enterprisePlanRequest?: Prisma.EnterprisePlanRequestOmit
+  enterprisePlanRequestEvent?: Prisma.EnterprisePlanRequestEventOmit
   subscriptionPayment?: Prisma.SubscriptionPaymentOmit
   plan?: Prisma.PlanOmit
   tenantSubscription?: Prisma.TenantSubscriptionOmit
   tenantUsage?: Prisma.TenantUsageOmit
   subscriptionEvent?: Prisma.SubscriptionEventOmit
   tenant?: Prisma.TenantOmit
-  enterprisePlanRequest?: Prisma.EnterprisePlanRequestOmit
   user?: Prisma.UserOmit
 }
 

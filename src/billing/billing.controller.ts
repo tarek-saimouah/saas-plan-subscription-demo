@@ -78,6 +78,28 @@ export class BillingController {
 
   @ApiOperation({
     summary: 'Roles: (user)',
+    description: 'enterprise plan subscribe',
+  })
+  @ApiCreatedDataResponse(UpgradePlanResponseDto)
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+  })
+  // permissions
+  @Roles(['user'])
+  @Post('enterprise-plan-subscribe')
+  async subscripeToEnterprisePlan(
+    @Body() payload: UpgradePlanDto,
+    @DecodedUser() decodedUser: JwtDecodedEntity,
+  ): Promise<DataResponse<UpgradePlanResponseDto>> {
+    const created = await this.billingService.subscripeToEnterprisePlan(
+      decodedUser.tenantId!,
+      payload,
+    );
+    return new DataResponse(created);
+  }
+
+  @ApiOperation({
+    summary: 'Roles: (user)',
     description: 'downgrade plan',
   })
   @ApiResponse({ type: MessageResponseDto })

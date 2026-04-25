@@ -1,4 +1,36 @@
 -- CreateTable
+CREATE TABLE "enterprise_plan_requests" (
+    "request_id" UUID NOT NULL,
+    "tenant_id" UUID NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "expected_projects" INTEGER,
+    "expected_users" INTEGER,
+    "expected_sessions" INTEGER,
+    "expected_requests" INTEGER,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "admin_notes" TEXT,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "enterprise_plan_requests_pkey" PRIMARY KEY ("request_id")
+);
+
+-- CreateTable
+CREATE TABLE "enterprise_plan_request_events" (
+    "event_id" UUID NOT NULL,
+    "request_id" UUID NOT NULL,
+    "type" TEXT NOT NULL,
+    "fromPlanId" UUID,
+    "toPlanId" UUID,
+    "actor_user_id" UUID,
+    "meta" JSONB,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "enterprise_plan_request_events_pkey" PRIMARY KEY ("event_id")
+);
+
+-- CreateTable
 CREATE TABLE "subscription_payments" (
     "payment_id" UUID NOT NULL,
     "subscription_id" UUID NOT NULL,
@@ -64,7 +96,7 @@ CREATE TABLE "tenant_subscriptions" (
     "tap_customer_id" TEXT,
     "tap_card_id" TEXT,
     "tap_payment_agreement_id" TEXT,
-    "latest_ayment_id" UUID,
+    "latest_payment_id" UUID,
     "billing_cycle" TEXT NOT NULL DEFAULT 'monthly',
     "nextBillingAt" TIMESTAMPTZ(6),
     "lastBillingAt" TIMESTAMPTZ(6),
@@ -115,24 +147,6 @@ CREATE TABLE "tenants" (
 );
 
 -- CreateTable
-CREATE TABLE "enterprise_plan_requests" (
-    "request_id" UUID NOT NULL,
-    "tenant_id" UUID NOT NULL,
-    "title" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "expected_products" INTEGER,
-    "expected_users" INTEGER,
-    "expected_sessions" INTEGER,
-    "expected_requests" INTEGER,
-    "status" TEXT NOT NULL DEFAULT 'pending',
-    "admin_notes" TEXT,
-    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "enterprise_plan_requests_pkey" PRIMARY KEY ("request_id")
-);
-
--- CreateTable
 CREATE TABLE "users" (
     "user_id" UUID NOT NULL,
     "email" TEXT NOT NULL,
@@ -147,6 +161,9 @@ CREATE TABLE "users" (
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("user_id")
 );
+
+-- CreateIndex
+CREATE INDEX "enterprise_plan_requests_status_created_at_idx" ON "enterprise_plan_requests"("status", "created_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "subscription_payments_provider_event_id_key" ON "subscription_payments"("provider_event_id");
@@ -179,10 +196,13 @@ CREATE UNIQUE INDEX "tenants_name_key" ON "tenants"("name");
 CREATE UNIQUE INDEX "tenants_owner_id_key" ON "tenants"("owner_id");
 
 -- CreateIndex
-CREATE INDEX "enterprise_plan_requests_status_created_at_idx" ON "enterprise_plan_requests"("status", "created_at");
-
--- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- AddForeignKey
+ALTER TABLE "enterprise_plan_requests" ADD CONSTRAINT "enterprise_plan_requests_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("tanant_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "enterprise_plan_request_events" ADD CONSTRAINT "enterprise_plan_request_events_request_id_fkey" FOREIGN KEY ("request_id") REFERENCES "enterprise_plan_requests"("request_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "subscription_payments" ADD CONSTRAINT "subscription_payments_subscription_id_fkey" FOREIGN KEY ("subscription_id") REFERENCES "tenant_subscriptions"("subscription_id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -200,7 +220,7 @@ ALTER TABLE "tenant_subscriptions" ADD CONSTRAINT "tenant_subscriptions_plan_id_
 ALTER TABLE "tenant_subscriptions" ADD CONSTRAINT "tenant_subscriptions_pending_plan_id_fkey" FOREIGN KEY ("pending_plan_id") REFERENCES "plans"("plan_id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tenant_subscriptions" ADD CONSTRAINT "tenant_subscriptions_latest_ayment_id_fkey" FOREIGN KEY ("latest_ayment_id") REFERENCES "subscription_payments"("payment_id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "tenant_subscriptions" ADD CONSTRAINT "tenant_subscriptions_latest_payment_id_fkey" FOREIGN KEY ("latest_payment_id") REFERENCES "subscription_payments"("payment_id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tenant_usages" ADD CONSTRAINT "tenant_usages_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("tanant_id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -210,6 +230,3 @@ ALTER TABLE "subscription_events" ADD CONSTRAINT "subscription_events_subscripti
 
 -- AddForeignKey
 ALTER TABLE "tenants" ADD CONSTRAINT "tenants_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "enterprise_plan_requests" ADD CONSTRAINT "enterprise_plan_requests_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("tanant_id") ON DELETE CASCADE ON UPDATE CASCADE;

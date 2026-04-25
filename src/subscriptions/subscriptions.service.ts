@@ -6,7 +6,6 @@ import {
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
   BillingCycleEnum,
-  CurrencyEnum,
   PlanKindEnum,
   PaymentStatusEnum,
   SubscriptionEventTypeEnum,
@@ -111,72 +110,6 @@ export class SubscriptionsService {
       });
 
       return { tenant, subscription };
-    });
-  }
-
-  async createEnterprisePlanForTenant(params: {
-    tenantId: string;
-    name: string;
-    description?: string;
-    monthlyPrice: number;
-    yearlyPrice: number;
-    currency?: string;
-    quotas: {
-      maxProjects: number;
-      maxUsers: number;
-      maxSessions: number;
-      maxRequests: number;
-    };
-  }) {
-    return this.prisma.$transaction(async (tx) => {
-      const tenant = await tx.tenant.findUnique({
-        where: { tenantId: params.tenantId },
-      });
-
-      this.logger.info({ tenant });
-
-      if (!tenant) {
-        throw new NotFoundException('Tenant not found');
-      }
-
-      const existingPrivatePlan = await tx.plan.findFirst({
-        where: {
-          kind: PlanKindEnum.ENTERPRISE_CUSTOM,
-          tenantId: params.tenantId,
-        },
-      });
-
-      this.logger.info({ existingPrivatePlan });
-
-      if (existingPrivatePlan) {
-        throw new BadRequestException(
-          'Enterprise plan already exists for this tenant',
-        );
-      }
-
-      const plan = await tx.plan.create({
-        data: {
-          kind: PlanKindEnum.ENTERPRISE_CUSTOM,
-          tenantId: params.tenantId,
-          name: params.name,
-          description: params.description,
-          isActive: true,
-          monthlyPrice: params.monthlyPrice,
-          yearlyPrice: params.yearlyPrice,
-          currency: params.currency ?? CurrencyEnum.USD,
-          maxProjects: params.quotas.maxProjects,
-          maxUsers: params.quotas.maxUsers,
-          maxSessions: params.quotas.maxSessions,
-          maxRequests: params.quotas.maxRequests,
-        },
-      });
-
-      this.logger.info({ plan });
-
-      // The enterprise plan is now available for this tenant only.
-      // If you want audit logging here, use a dedicated admin audit log table
-      // rather than SubscriptionEvent, because the subscription may not exist yet.
-      return plan;
     });
   }
 
@@ -296,10 +229,24 @@ export class SubscriptionsService {
       const now = new Date();
       const periodDays =
         subscription.billingCycle === BillingCycleEnum.YEARLY ? 365 : 30;
-      const newEnd = new Date(new Date().setDate(now.getDate() + periodDays));
+
+      let newEnd = new Date(new Date().setDate(now.getDate() + periodDays));
+
+      // optional: if the requirement is to set end date to (current period end + period days) when subscription status is past_due
+      // if subscription status is past_due the new end must be (current period end + period days)
+      // if (
+      //   subscription.status === SubscriptionStatusEnum.PAST_DUE &&
+      //   subscription.currentPeriodEnd < now
+      // ) {
+      //   newEnd = new Date(
+      //     new Date(subscription.currentPeriodEnd).setDate(
+      //       now.getDate() + periodDays,
+      //     ),
+      //   );
+      // }
 
       // optional: if the requirement is to set end date to the end of the last day
-      // const newEnd = getEndOfDay(
+      // newEnd = getEndOfDay(
       //   new Date(new Date().setDate(now.getDate() + periodDays)),
       // );
 

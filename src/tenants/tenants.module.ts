@@ -6,9 +6,10 @@ import { DashboardTenantsController } from './tenants.dashboard.controller';
 import { SubscriptionsModule } from 'src/subscriptions/subscriptions.module';
 import { TenantProfilesService } from './tenant-profiles.service';
 import { PaymentsModule } from 'src/payments/payments.module';
+import { PlansModule } from 'src/plans/plans.module';
 
 @Module({
-  imports: [SubscriptionsModule, PaymentsModule],
+  imports: [SubscriptionsModule, PaymentsModule, PlansModule],
   exports: [TenantsService, TenantMapper],
   controllers: [TenantsController, DashboardTenantsController],
   providers: [TenantsService, TenantProfilesService, TenantMapper],

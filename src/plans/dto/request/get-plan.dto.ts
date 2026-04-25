@@ -1,7 +1,7 @@
 import { ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
 import { CreatePlanDto } from './create-plan.dto';
 import { PlanKindEnum } from 'src/common';
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class GetPlanDto extends PartialType(
   OmitType(CreatePlanDto, ['monthlyPrice', 'yearlyPrice'] as const),
@@ -10,4 +10,9 @@ export class GetPlanDto extends PartialType(
   @IsEnum(PlanKindEnum)
   @IsOptional()
   kind?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  tenantId?: string;
 }

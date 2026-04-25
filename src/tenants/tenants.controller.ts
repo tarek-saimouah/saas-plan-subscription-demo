@@ -32,6 +32,7 @@ import {
   JwtDecodedEntity,
   MessageResponseDto,
   PaginationParams,
+  PlanKindEnum,
   RequireQuota,
   RequireSubscription,
   Roles,
@@ -50,6 +51,8 @@ import {
 import { PaymentResponseDto } from 'src/payments/dto';
 import { PaymentsService } from 'src/payments/payments.service';
 import { SubscriptionEventsService } from 'src/subscriptions/subscription-events.service';
+import { PlanResponseDto } from 'src/plans';
+import { PlansService } from 'src/plans/plans.service';
 
 @ApiInternalServerErrorResponse({ type: ErrorResponseDto })
 @ApiUnauthorizedResponse({ type: ErrorResponseDto })
@@ -63,6 +66,7 @@ export class TenantsController {
     private readonly tenantProfilesService: TenantProfilesService,
     private readonly paymentsService: PaymentsService,
     private readonly subscriptionEventsService: SubscriptionEventsService,
+    private readonly plansService: PlansService,
   ) {}
 
   @ApiOperation({
@@ -216,6 +220,24 @@ export class TenantsController {
   ): Promise<DataResponse<SubscriptionUsageResponseDto>> {
     const result = await this.tenantsService.getUsage(decodedUser.tenantId!);
     return new DataResponse(result);
+  }
+
+  @ApiOperation({
+    summary: 'Roles: (user)',
+    description: 'Get tenant enterprise plans (paging)',
+  })
+  @ApiPaginatedResponse(PlanResponseDto)
+  // permissions
+  @Roles(['user'])
+  @Get('enterprise-plans')
+  findAllEnterprisePlansPaging(
+    @DecodedUser() decodedUser: JwtDecodedEntity,
+    @Query() pagingArgs?: PaginationParams,
+  ): Promise<IPaginatedResult<PlanResponseDto>> {
+    return this.plansService.findAllPaging(
+      { tenantId: decodedUser.tenantId!, kind: PlanKindEnum.ENTERPRISE_CUSTOM },
+      pagingArgs,
+    );
   }
 
   @ApiOperation({

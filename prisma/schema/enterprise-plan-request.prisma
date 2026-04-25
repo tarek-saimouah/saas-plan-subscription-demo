@@ -1,0 +1,45 @@
+model EnterprisePlanRequest {
+  requestId String @id() @default(uuid()) @map("request_id") @db.Uuid
+  tenantId  String @map("tenant_id") @db.Uuid
+
+  title       String
+  description String
+
+  // quota columns
+  expectedProjects Int? @map("expected_projects")
+  expectedUsers    Int? @map("expected_users")
+  expectedSessions Int? @map("expected_sessions")
+  expectedRequests Int? @map("expected_requests")
+
+  status     String  @default("pending") // pending, contacted, approved, rejected
+  adminNotes String? @map("admin_notes")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // relations
+  tenant Tenant                       @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  events EnterprisePlanRequestEvent[]
+
+  @@index([status, createdAt])
+  @@map("enterprise_plan_requests")
+}
+
+model EnterprisePlanRequestEvent {
+  eventId   String @id() @default(uuid()) @map("event_id") @db.Uuid
+  requestId String @map("request_id") @db.Uuid
+
+  type       String // created, reviewed
+  fromPlanId String? @map("fromPlanId") @db.Uuid
+  toPlanId   String? @map("toPlanId") @db.Uuid
+
+  actorUserId String? @map("actor_user_id") @db.Uuid
+  meta        Json?   @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // relations
+  request EnterprisePlanRequest @relation(fields: [requestId], references: [requestId], onDelete: Cascade)
+
+  @@map("enterprise_plan_request_events")
+}

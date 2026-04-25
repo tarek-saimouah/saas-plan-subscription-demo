@@ -51,13 +51,14 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  EnterprisePlanRequest: 'EnterprisePlanRequest',
+  EnterprisePlanRequestEvent: 'EnterprisePlanRequestEvent',
   SubscriptionPayment: 'SubscriptionPayment',
   Plan: 'Plan',
   TenantSubscription: 'TenantSubscription',
   TenantUsage: 'TenantUsage',
   SubscriptionEvent: 'SubscriptionEvent',
   Tenant: 'Tenant',
-  EnterprisePlanRequest: 'EnterprisePlanRequest',
   User: 'User'
 } as const
 
@@ -75,6 +76,38 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const EnterprisePlanRequestScalarFieldEnum = {
+  requestId: 'requestId',
+  tenantId: 'tenantId',
+  title: 'title',
+  description: 'description',
+  expectedProjects: 'expectedProjects',
+  expectedUsers: 'expectedUsers',
+  expectedSessions: 'expectedSessions',
+  expectedRequests: 'expectedRequests',
+  status: 'status',
+  adminNotes: 'adminNotes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EnterprisePlanRequestScalarFieldEnum = (typeof EnterprisePlanRequestScalarFieldEnum)[keyof typeof EnterprisePlanRequestScalarFieldEnum]
+
+
+export const EnterprisePlanRequestEventScalarFieldEnum = {
+  eventId: 'eventId',
+  requestId: 'requestId',
+  type: 'type',
+  fromPlanId: 'fromPlanId',
+  toPlanId: 'toPlanId',
+  actorUserId: 'actorUserId',
+  meta: 'meta',
+  createdAt: 'createdAt'
+} as const
+
+export type EnterprisePlanRequestEventScalarFieldEnum = (typeof EnterprisePlanRequestEventScalarFieldEnum)[keyof typeof EnterprisePlanRequestEventScalarFieldEnum]
 
 
 export const SubscriptionPaymentScalarFieldEnum = {
@@ -193,24 +226,6 @@ export const TenantScalarFieldEnum = {
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
 
 
-export const EnterprisePlanRequestScalarFieldEnum = {
-  requestId: 'requestId',
-  tenantId: 'tenantId',
-  title: 'title',
-  description: 'description',
-  expectedproducts: 'expectedproducts',
-  expectedusers: 'expectedusers',
-  expectedsessions: 'expectedsessions',
-  expectedrequests: 'expectedrequests',
-  status: 'status',
-  adminNotes: 'adminNotes',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type EnterprisePlanRequestScalarFieldEnum = (typeof EnterprisePlanRequestScalarFieldEnum)[keyof typeof EnterprisePlanRequestScalarFieldEnum]
-
-
 export const UserScalarFieldEnum = {
   userId: 'userId',
   email: 'email',
@@ -251,6 +266,14 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -258,12 +281,4 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

@@ -29,8 +29,8 @@ export * from "./enums.js"
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more SubscriptionPayments
- * const subscriptionPayments = await prisma.subscriptionPayment.findMany()
+ * // Fetch zero or more EnterprisePlanRequests
+ * const enterprisePlanRequests = await prisma.enterprisePlanRequest.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -39,6 +39,16 @@ export const PrismaClient = $Class.getPrismaClientClass()
 export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts extends Prisma.PrismaClientOptions["omit"] = Prisma.PrismaClientOptions["omit"], ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = $Class.PrismaClient<LogOpts, OmitOpts, ExtArgs>
 export { Prisma }
 
+/**
+ * Model EnterprisePlanRequest
+ * 
+ */
+export type EnterprisePlanRequest = Prisma.EnterprisePlanRequestModel
+/**
+ * Model EnterprisePlanRequestEvent
+ * 
+ */
+export type EnterprisePlanRequestEvent = Prisma.EnterprisePlanRequestEventModel
 /**
  * Model SubscriptionPayment
  * 
@@ -69,11 +79,6 @@ export type SubscriptionEvent = Prisma.SubscriptionEventModel
  * 
  */
 export type Tenant = Prisma.TenantModel
-/**
- * Model EnterprisePlanRequest
- * 
- */
-export type EnterprisePlanRequest = Prisma.EnterprisePlanRequestModel
 /**
  * Model User
  * 

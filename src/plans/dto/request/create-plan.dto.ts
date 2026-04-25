@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
@@ -73,3 +73,7 @@ export class CreatePlanDto {
   @Min(0)
   maxRequests: number;
 }
+
+export class CreateEnterprisePlanDto extends OmitType(CreatePlanDto, [
+  'sortOrder',
+] as const) {}

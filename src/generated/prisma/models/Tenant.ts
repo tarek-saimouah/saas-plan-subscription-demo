@@ -330,14 +330,14 @@ export type TenantUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type TenantNullableScalarRelationFilter = {
-  is?: Prisma.TenantWhereInput | null
-  isNot?: Prisma.TenantWhereInput | null
-}
-
 export type TenantScalarRelationFilter = {
   is?: Prisma.TenantWhereInput
   isNot?: Prisma.TenantWhereInput
+}
+
+export type TenantNullableScalarRelationFilter = {
+  is?: Prisma.TenantWhereInput | null
+  isNot?: Prisma.TenantWhereInput | null
 }
 
 export type TenantCountOrderByAggregateInput = {
@@ -365,6 +365,20 @@ export type TenantMinOrderByAggregateInput = {
   suspendedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type TenantCreateNestedOneWithoutEnterprisePlanRequestsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedCreateWithoutEnterprisePlanRequestsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutEnterprisePlanRequestsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutEnterprisePlanRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedCreateWithoutEnterprisePlanRequestsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutEnterprisePlanRequestsInput
+  upsert?: Prisma.TenantUpsertWithoutEnterprisePlanRequestsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutEnterprisePlanRequestsInput, Prisma.TenantUpdateWithoutEnterprisePlanRequestsInput>, Prisma.TenantUncheckedUpdateWithoutEnterprisePlanRequestsInput>
 }
 
 export type TenantCreateNestedOneWithoutEnterprisePlansInput = {
@@ -411,20 +425,6 @@ export type TenantUpdateOneRequiredWithoutUsageNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutUsageInput, Prisma.TenantUpdateWithoutUsageInput>, Prisma.TenantUncheckedUpdateWithoutUsageInput>
 }
 
-export type TenantCreateNestedOneWithoutEnterprisePlanRequestsInput = {
-  create?: Prisma.XOR<Prisma.TenantCreateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedCreateWithoutEnterprisePlanRequestsInput>
-  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutEnterprisePlanRequestsInput
-  connect?: Prisma.TenantWhereUniqueInput
-}
-
-export type TenantUpdateOneRequiredWithoutEnterprisePlanRequestsNestedInput = {
-  create?: Prisma.XOR<Prisma.TenantCreateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedCreateWithoutEnterprisePlanRequestsInput>
-  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutEnterprisePlanRequestsInput
-  upsert?: Prisma.TenantUpsertWithoutEnterprisePlanRequestsInput
-  connect?: Prisma.TenantWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutEnterprisePlanRequestsInput, Prisma.TenantUpdateWithoutEnterprisePlanRequestsInput>, Prisma.TenantUncheckedUpdateWithoutEnterprisePlanRequestsInput>
-}
-
 export type TenantCreateNestedOneWithoutOwnerInput = {
   create?: Prisma.XOR<Prisma.TenantCreateWithoutOwnerInput, Prisma.TenantUncheckedCreateWithoutOwnerInput>
   connectOrCreate?: Prisma.TenantCreateOrConnectWithoutOwnerInput
@@ -455,6 +455,70 @@ export type TenantUncheckedUpdateOneWithoutOwnerNestedInput = {
   delete?: Prisma.TenantWhereInput | boolean
   connect?: Prisma.TenantWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutOwnerInput, Prisma.TenantUpdateWithoutOwnerInput>, Prisma.TenantUncheckedUpdateWithoutOwnerInput>
+}
+
+export type TenantCreateWithoutEnterprisePlanRequestsInput = {
+  tenantId?: string
+  name: string
+  suspendedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutTenantInput
+  subscription?: Prisma.TenantSubscriptionCreateNestedOneWithoutTenantInput
+  enterprisePlans?: Prisma.PlanCreateNestedManyWithoutTenantInput
+  usage?: Prisma.TenantUsageCreateNestedOneWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutEnterprisePlanRequestsInput = {
+  tenantId?: string
+  name: string
+  ownerId: string
+  suspendedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  subscription?: Prisma.TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+  enterprisePlans?: Prisma.PlanUncheckedCreateNestedManyWithoutTenantInput
+  usage?: Prisma.TenantUsageUncheckedCreateNestedOneWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutEnterprisePlanRequestsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedCreateWithoutEnterprisePlanRequestsInput>
+}
+
+export type TenantUpsertWithoutEnterprisePlanRequestsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedUpdateWithoutEnterprisePlanRequestsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedCreateWithoutEnterprisePlanRequestsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutEnterprisePlanRequestsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedUpdateWithoutEnterprisePlanRequestsInput>
+}
+
+export type TenantUpdateWithoutEnterprisePlanRequestsInput = {
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutTenantNestedInput
+  subscription?: Prisma.TenantSubscriptionUpdateOneWithoutTenantNestedInput
+  enterprisePlans?: Prisma.PlanUpdateManyWithoutTenantNestedInput
+  usage?: Prisma.TenantUsageUpdateOneWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutEnterprisePlanRequestsInput = {
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  subscription?: Prisma.TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+  enterprisePlans?: Prisma.PlanUncheckedUpdateManyWithoutTenantNestedInput
+  usage?: Prisma.TenantUsageUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutEnterprisePlansInput = {
@@ -647,70 +711,6 @@ export type TenantUncheckedUpdateWithoutUsageInput = {
   subscription?: Prisma.TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
   enterprisePlans?: Prisma.PlanUncheckedUpdateManyWithoutTenantNestedInput
   enterprisePlanRequests?: Prisma.EnterprisePlanRequestUncheckedUpdateManyWithoutTenantNestedInput
-}
-
-export type TenantCreateWithoutEnterprisePlanRequestsInput = {
-  tenantId?: string
-  name: string
-  suspendedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  owner: Prisma.UserCreateNestedOneWithoutTenantInput
-  subscription?: Prisma.TenantSubscriptionCreateNestedOneWithoutTenantInput
-  enterprisePlans?: Prisma.PlanCreateNestedManyWithoutTenantInput
-  usage?: Prisma.TenantUsageCreateNestedOneWithoutTenantInput
-}
-
-export type TenantUncheckedCreateWithoutEnterprisePlanRequestsInput = {
-  tenantId?: string
-  name: string
-  ownerId: string
-  suspendedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  subscription?: Prisma.TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput
-  enterprisePlans?: Prisma.PlanUncheckedCreateNestedManyWithoutTenantInput
-  usage?: Prisma.TenantUsageUncheckedCreateNestedOneWithoutTenantInput
-}
-
-export type TenantCreateOrConnectWithoutEnterprisePlanRequestsInput = {
-  where: Prisma.TenantWhereUniqueInput
-  create: Prisma.XOR<Prisma.TenantCreateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedCreateWithoutEnterprisePlanRequestsInput>
-}
-
-export type TenantUpsertWithoutEnterprisePlanRequestsInput = {
-  update: Prisma.XOR<Prisma.TenantUpdateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedUpdateWithoutEnterprisePlanRequestsInput>
-  create: Prisma.XOR<Prisma.TenantCreateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedCreateWithoutEnterprisePlanRequestsInput>
-  where?: Prisma.TenantWhereInput
-}
-
-export type TenantUpdateToOneWithWhereWithoutEnterprisePlanRequestsInput = {
-  where?: Prisma.TenantWhereInput
-  data: Prisma.XOR<Prisma.TenantUpdateWithoutEnterprisePlanRequestsInput, Prisma.TenantUncheckedUpdateWithoutEnterprisePlanRequestsInput>
-}
-
-export type TenantUpdateWithoutEnterprisePlanRequestsInput = {
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  owner?: Prisma.UserUpdateOneRequiredWithoutTenantNestedInput
-  subscription?: Prisma.TenantSubscriptionUpdateOneWithoutTenantNestedInput
-  enterprisePlans?: Prisma.PlanUpdateManyWithoutTenantNestedInput
-  usage?: Prisma.TenantUsageUpdateOneWithoutTenantNestedInput
-}
-
-export type TenantUncheckedUpdateWithoutEnterprisePlanRequestsInput = {
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  subscription?: Prisma.TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
-  enterprisePlans?: Prisma.PlanUncheckedUpdateManyWithoutTenantNestedInput
-  usage?: Prisma.TenantUsageUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOwnerInput = {

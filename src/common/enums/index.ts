@@ -5,5 +5,6 @@ export * from './plan-kind.enum';
 export * from './currency.enum';
 export * from './payment-status.enum';
 export * from './enterprise-plan-request-status.enum';
-export * from './subscription-status.enum';
+export * from './enterprise-plan-request-event-type.enum';
 export * from './billing-cycle.enum';
+export * from './subscription-status.enum';
