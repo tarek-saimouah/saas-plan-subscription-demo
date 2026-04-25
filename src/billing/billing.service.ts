@@ -8,8 +8,9 @@ import { PaymentGatewayService } from 'src/payment-gateway/payment-gateway.servi
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 import {
   DowngradePlanDto,
+  ResubscribeSuspendedPlanDto,
   UpgradePlanDto,
-  UpgradePlanResponseDto,
+  RequestPlanSubscriptionResponseDto,
 } from './dto';
 import {
   BillingCycleEnum,
@@ -29,7 +30,7 @@ export class BillingService {
   async upgradePlan(
     tenantId: string,
     payload: UpgradePlanDto,
-  ): Promise<UpgradePlanResponseDto> {
+  ): Promise<RequestPlanSubscriptionResponseDto> {
     // check if tenant exists
     const tenant = await this.prisma.tenant.findUnique({
       where: { tenantId },
@@ -103,7 +104,7 @@ export class BillingService {
   async subscripeToEnterprisePlan(
     tenantId: string,
     payload: UpgradePlanDto,
-  ): Promise<UpgradePlanResponseDto> {
+  ): Promise<RequestPlanSubscriptionResponseDto> {
     const [tenant, plan] = await Promise.all([
       this.prisma.tenant.findUnique({
         where: { tenantId },
@@ -173,5 +174,74 @@ export class BillingService {
     return {
       transactionUrl: charge.transaction.url,
     };
+  }
+
+  async resubscribeSuspendedPlan(
+    tenantId: string,
+    payload: ResubscribeSuspendedPlanDto,
+  ): Promise<RequestPlanSubscriptionResponseDto> {
+    // check if tenant exists
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { tenantId },
+      include: {
+        owner: true,
+      },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
+    // request tenant resubscription
+    const requestResubscribe =
+      await this.SubscriptionsService.requestResubscribeToSuspendedSubscription(
+        {
+          tenantId,
+          billingCycle: payload.billingCycle as BillingCycleEnum,
+        },
+      );
+
+    // create charge request
+
+    const charge =
+      await this.paymentGatewayService.createInitialChargeWithSaveCard({
+        amount: requestResubscribe.amount,
+        currency: requestResubscribe.currency,
+        description: `Resubscribe with ${requestResubscribe.plan.name}`,
+        customer: {
+          firstName: tenant.owner.fullName,
+          email: tenant.owner.email,
+        },
+        referenceOrder: `ord_${requestResubscribe.subscriptionId}_${Date.now()}`,
+        referenceTransaction: `txn_${requestResubscribe.subscriptionId}_${Date.now()}`,
+        metadata: {
+          subscriptionId: requestResubscribe.subscriptionId,
+          tenantId,
+          paymentFor: 'subscription',
+        },
+      });
+
+    return {
+      transactionUrl: charge.transaction.url,
+    };
+  }
+
+  async cancelSubscriptionPlan(tenantId: string): Promise<MessageResponseDto> {
+    // check if tenant exists
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { tenantId },
+      include: {
+        owner: true,
+      },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
+    // request tenant subscription cancel
+    await this.SubscriptionsService.cancelSubscription(tenantId);
+
+    return new SuccessResponseDto('Subscription cancelled successfully');
   }
 }

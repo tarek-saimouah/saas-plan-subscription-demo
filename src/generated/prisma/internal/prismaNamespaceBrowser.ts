@@ -218,7 +218,6 @@ export const TenantScalarFieldEnum = {
   tenantId: 'tenantId',
   name: 'name',
   ownerId: 'ownerId',
-  suspendedAt: 'suspendedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

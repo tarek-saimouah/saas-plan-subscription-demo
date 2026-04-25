@@ -9,7 +9,6 @@ export class TenantMapper {
     return new TenantEntity({
       tenantId: tenant.tenantId,
       name: tenant.name,
-      suspendedAt: tenant.suspendedAt,
       createdAt: tenant.createdAt,
       updatedAt: tenant.updatedAt,
     });

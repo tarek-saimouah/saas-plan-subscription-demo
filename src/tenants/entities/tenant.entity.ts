@@ -10,9 +10,6 @@ export class TenantEntity {
   @ApiProperty()
   readonly name: string;
 
-  @ApiProperty({ type: Date, nullable: true })
-  readonly suspendedAt?: Date | null;
-
   @ApiProperty({ type: Date })
   readonly createdAt: Date;
 

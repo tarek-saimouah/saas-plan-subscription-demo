@@ -1,1 +1,1 @@
-export * from './upgrade-plan.response.dto';
+export * from './request-plan-subscription.response.dto';

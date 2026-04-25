@@ -16,9 +16,10 @@ import {
   getPaginationArgs,
   getPaginationMeta,
   PagingDataResponse,
+  addDaysToDate,
 } from 'src/common';
 import { PrismaService } from 'src/database';
-import { Prisma } from 'src/generated/prisma/client';
+import { Plan, Prisma } from 'src/generated/prisma/client';
 import { GetSubscriptionDto, SubscriptionResponseDto } from './dto';
 import { SubscriptionMapper } from './mappers';
 
@@ -65,13 +66,11 @@ export class SubscriptionsService {
       }
 
       const now = new Date();
-      const trialEndsAt = new Date(
-        new Date().setDate(now.getDate() + trialPlan.trialDays),
-      );
+      const trialEndsAt = addDaysToDate(now, trialPlan.trialDays);
 
       // optional: if the requirement is to set trial end to the end of the last day
       // const trialEndsAt = getEndOfDay(
-      //   new Date(new Date().setDate(now.getDate() + trialPlan.trialDays)),
+      //   addDaysToDate(now, trialPlan.trialDays)
       // );
 
       const subscription = await tx.tenantSubscription.create({
@@ -182,243 +181,16 @@ export class SubscriptionsService {
       return {
         subscriptionId: subscription.subscriptionId,
         plan: newPlan,
-        amount:
-          params.billingCycle === BillingCycleEnum.MONTHLY
-            ? newPlan.monthlyPrice.toNumber()
-            : newPlan.yearlyPrice.toNumber(),
+        amount: this.getSubscriptionPriceAmount({
+          plan: newPlan,
+          billingCycle: params.billingCycle,
+        }),
         currency: newPlan.currency,
       };
     });
   }
 
-  async activateAfterSuccessfulPayment(params: {
-    tenantId: string;
-    provider: string;
-    providerEventId: string;
-    providerPaymentRef?: string;
-    tapCardId: string;
-    tapCustomerId: string;
-    tapPaymentAgreementId: string;
-    amount: number;
-    currency: string;
-    billingCycle: BillingCycleEnum;
-    rawPayload?: Prisma.JsonValue;
-  }) {
-    return this.prisma.$transaction(async (tx) => {
-      const subscription = await tx.tenantSubscription.findUnique({
-        where: { tenantId: params.tenantId },
-        include: { plan: true },
-      });
-
-      this.logger.info({ subscription });
-
-      if (!subscription) {
-        throw new NotFoundException('Subscription not found');
-      }
-
-      const existingPayment = await tx.subscriptionPayment.findUnique({
-        where: { providerEventId: params.providerEventId },
-      });
-
-      this.logger.info({ existingPayment });
-
-      if (existingPayment) {
-        return existingPayment;
-      }
-
-      const now = new Date();
-      const periodDays =
-        subscription.billingCycle === BillingCycleEnum.YEARLY ? 365 : 30;
-
-      let newEnd = new Date(new Date().setDate(now.getDate() + periodDays));
-
-      // optional: if the requirement is to set end date to (current period end + period days) when subscription status is past_due
-      // if subscription status is past_due the new end must be (current period end + period days)
-      // if (
-      //   subscription.status === SubscriptionStatusEnum.PAST_DUE &&
-      //   subscription.currentPeriodEnd < now
-      // ) {
-      //   newEnd = new Date(
-      //     new Date(subscription.currentPeriodEnd).setDate(
-      //       now.getDate() + periodDays,
-      //     ),
-      //   );
-      // }
-
-      // optional: if the requirement is to set end date to the end of the last day
-      // newEnd = getEndOfDay(
-      //   new Date(new Date().setDate(now.getDate() + periodDays)),
-      // );
-
-      const payment = await tx.subscriptionPayment.create({
-        data: {
-          subscriptionId: subscription.subscriptionId,
-          provider: params.provider,
-          providerEventId: params.providerEventId,
-          providerPaymentRef: params.providerPaymentRef,
-          amount: params.amount,
-          currency: params.currency,
-          status: PaymentStatusEnum.SUCCEEDED,
-          rawPayload: params.rawPayload ?? undefined,
-          paidAt: now,
-        },
-      });
-
-      this.logger.info({ payment });
-
-      const activePlanId = subscription.pendingPlanId ?? subscription.planId;
-      const activePlan = await tx.plan.findUnique({
-        where: { planId: activePlanId },
-      });
-
-      this.logger.info({ activePlan });
-
-      let priceSnapshot = subscription.priceSnapshot;
-      if (activePlan?.monthlyPrice) {
-        priceSnapshot =
-          params.billingCycle === BillingCycleEnum.MONTHLY
-            ? activePlan.monthlyPrice
-            : activePlan.yearlyPrice;
-      }
-
-      const updated = await tx.tenantSubscription.update({
-        where: { tenantId: params.tenantId },
-        data: {
-          planId: activePlanId,
-          status: SubscriptionStatusEnum.ACTIVE,
-          currentPeriodStart: now,
-          currentPeriodEnd: newEnd,
-          nextBillingAt: newEnd,
-          lastBillingAt: now,
-          retryCount: 0, // reset recurring payment retry count
-          cancelAtPeriodEnd: false,
-          cancelledAt: null,
-          suspendedAt: null,
-          pastDueAt: null,
-          pendingPlanId: null,
-          pendingPlanEffectiveAt: null,
-          latestPaymentId: payment.paymentId,
-          paymentProvider: params.provider,
-          ...(params.tapCardId && {
-            tapCardId: params.tapCardId,
-          }),
-          ...(params.tapCustomerId && {
-            tapCustomerId: params.tapCustomerId,
-          }),
-          ...(params.tapPaymentAgreementId && {
-            tapPaymentAgreementId: params.tapPaymentAgreementId,
-          }),
-          priceSnapshot,
-          quotaSnapshot: activePlan
-            ? ({
-                maxProjects: activePlan.maxProjects,
-                maxUsers: activePlan.maxUsers,
-                maxSessions: activePlan.maxSessions,
-                maxRequests: activePlan.maxRequests,
-              } as any)
-            : subscription.quotaSnapshot,
-        },
-      });
-
-      this.logger.info({ updated });
-
-      await tx.subscriptionEvent.create({
-        data: {
-          subscriptionId: subscription.subscriptionId,
-          type:
-            subscription.status === SubscriptionStatusEnum.TRIALING
-              ? SubscriptionEventTypeEnum.PAYMENT_SUCCEEDED
-              : SubscriptionEventTypeEnum.RENEWED,
-          fromPlanId: subscription.planId,
-          toPlanId: activePlanId,
-          meta: {
-            amount: params.amount,
-            currency: params.currency,
-            providerPaymentRef: params.providerPaymentRef,
-          },
-        },
-      });
-
-      return updated;
-    });
-  }
-
-  async markPaymentFailed(params: {
-    tenantId: string;
-    providerEventId: string;
-    amount: number;
-    currency: string;
-    failureReason?: string;
-    rawPayload?: Prisma.JsonValue;
-  }) {
-    return this.prisma.$transaction(async (tx) => {
-      const subscription = await tx.tenantSubscription.findUnique({
-        where: { tenantId: params.tenantId },
-      });
-
-      this.logger.info({ subscription });
-
-      if (!subscription) throw new NotFoundException('Subscription not found');
-
-      const existingSubscription = await tx.subscriptionPayment.findUnique({
-        where: { providerEventId: params.providerEventId },
-      });
-
-      this.logger.info({ existingSubscription });
-
-      if (existingSubscription) return existingSubscription;
-
-      // check if retry count exceeded 3
-      if (subscription.retryCount >= 3) {
-        return subscription;
-      }
-
-      const now = new Date();
-
-      const payment = await tx.subscriptionPayment.create({
-        data: {
-          subscriptionId: subscription.subscriptionId,
-          provider: 'tap',
-          providerEventId: params.providerEventId,
-          amount: params.amount,
-          currency: params.currency,
-          status: PaymentStatusEnum.FAILED,
-          rawPayload: params.rawPayload ?? undefined,
-          failedAt: now,
-          failureReason: params.failureReason,
-        },
-      });
-
-      this.logger.info({ payment });
-
-      await tx.tenantSubscription.update({
-        where: { tenantId: params.tenantId },
-        data: {
-          status: SubscriptionStatusEnum.ACTIVE,
-          pastDueAt: now,
-          lastGraceWarningAt: now,
-          // increment retry count
-          retryCount: { increment: 1 },
-          latestPaymentId: payment.paymentId,
-        },
-      });
-
-      await tx.subscriptionEvent.create({
-        data: {
-          subscriptionId: subscription.subscriptionId,
-          type: SubscriptionEventTypeEnum.PAYMENT_FAILED,
-          fromPlanId: subscription.planId,
-          meta: {
-            providerEventId: params.providerEventId,
-            reason: params.failureReason,
-          },
-        },
-      });
-
-      return payment;
-    });
-  }
-
+  // Not used
   async upgradeNowWithFullAmount(params: {
     tenantId: string;
     targetPlanId: string;
@@ -459,14 +231,14 @@ export class SubscriptionsService {
     }
 
     // The business rule here is "pay full amount now, extend 30 days from today"
-    // Payment execution is handled by TapService + webhook confirmation.
+    // Payment execution is handled by PaymentProviderService + webhook confirmation.
     return {
       fromPlan: subscription.plan,
       toPlan: targetPlan,
-      amount:
-        params.billingCycle === BillingCycleEnum.MONTHLY
-          ? targetPlan.monthlyPrice.toNumber()
-          : targetPlan.yearlyPrice.toNumber(),
+      amount: this.getSubscriptionPriceAmount({
+        plan: targetPlan,
+        billingCycle: params.billingCycle,
+      }),
       currency: targetPlan.currency,
       extendByDays: 30,
     };
@@ -562,10 +334,10 @@ export class SubscriptionsService {
 
       const newPlan = subscription.pendingPlan;
 
-      const newPrice =
-        subscription.billingCycle === BillingCycleEnum.MONTHLY
-          ? newPlan.monthlyPrice.toNumber()
-          : newPlan.yearlyPrice.toNumber();
+      const newPrice = this.getSubscriptionPriceAmount({
+        plan: newPlan,
+        billingCycle: subscription.billingCycle as BillingCycleEnum,
+      });
 
       await this.prisma.$transaction(async (tx) => {
         const updated = await tx.tenantSubscription.update({
@@ -636,6 +408,287 @@ export class SubscriptionsService {
     });
   }
 
+  async requestResubscribeToSuspendedSubscription(params: {
+    tenantId: string;
+    billingCycle: BillingCycleEnum;
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      const subscription = await tx.tenantSubscription.findUnique({
+        where: { tenantId: params.tenantId },
+        include: {
+          plan: true,
+          tenant: true,
+        },
+      });
+
+      this.logger.info({ subscription });
+
+      if (!subscription) {
+        throw new NotFoundException('Subscription not found');
+      }
+
+      if (subscription.status !== SubscriptionStatusEnum.SUSPENDED) {
+        throw new BadRequestException(
+          'Only suspended subscriptions can be resubscribed',
+        );
+      }
+
+      const suspendedAt = subscription.suspendedAt ?? subscription.updatedAt;
+      const reactivationWindowMs = 60 * 24 * 60 * 60 * 1000;
+
+      if (Date.now() - suspendedAt.getTime() > reactivationWindowMs) {
+        throw new BadRequestException('Reactivation window expired');
+      }
+
+      if (!subscription.plan) {
+        throw new BadRequestException('Plan not found');
+      }
+
+      return {
+        subscriptionId: subscription.subscriptionId,
+        plan: subscription.plan,
+        amount: this.getSubscriptionPriceAmount({
+          plan: subscription.plan,
+          billingCycle: params.billingCycle,
+        }),
+        // amount: subscription.plan.priceCents,
+        currency: subscription.plan.currency,
+      };
+    });
+  }
+
+  /**
+   * first activation
+   * renewal
+   * upgrade
+   * resubscribe suspended
+   */
+  async activateAfterSuccessfulPayment(params: {
+    tenantId: string;
+    provider: string;
+    providerEventId: string;
+    providerPaymentRef?: string;
+    tapCardId: string;
+    tapCustomerId: string;
+    tapPaymentAgreementId: string;
+    amount: number;
+    currency: string;
+    billingCycle: BillingCycleEnum;
+    rawPayload?: Prisma.JsonValue;
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      const subscription = await tx.tenantSubscription.findUnique({
+        where: { tenantId: params.tenantId },
+        include: { plan: true },
+      });
+
+      this.logger.info({ subscription });
+
+      if (!subscription) {
+        throw new NotFoundException('Subscription not found');
+      }
+
+      const existingPayment = await tx.subscriptionPayment.findUnique({
+        where: { providerEventId: params.providerEventId },
+      });
+
+      this.logger.info({ existingPayment });
+
+      if (existingPayment) {
+        return existingPayment;
+      }
+
+      const now = new Date();
+      const periodDays =
+        subscription.billingCycle === BillingCycleEnum.YEARLY ? 365 : 30;
+
+      const newEnd = addDaysToDate(now, periodDays);
+
+      // optional: if the requirement is to set end date to (current period end + period days) when subscription status is past_due
+      // if subscription status is past_due the new end must be (current period end + period days)
+      // if (
+      //   subscription.status === SubscriptionStatusEnum.PAST_DUE &&
+      //   subscription.currentPeriodEnd < now
+      // ) {
+      //   const newEnd = addDaysToDate(subscription.currentPeriodEnd, periodDays)
+      // }
+
+      // optional: if the requirement is to set end date to the end of the last day
+      // const newEnd = getEndOfDay(addDaysToDate(now, periodDays))
+
+      const payment = await tx.subscriptionPayment.create({
+        data: {
+          subscriptionId: subscription.subscriptionId,
+          provider: params.provider,
+          providerEventId: params.providerEventId,
+          providerPaymentRef: params.providerPaymentRef,
+          amount: params.amount,
+          currency: params.currency,
+          status: PaymentStatusEnum.SUCCEEDED,
+          rawPayload: params.rawPayload ?? undefined,
+          paidAt: now,
+        },
+      });
+
+      this.logger.info({ payment });
+
+      const activePlanId = subscription.pendingPlanId ?? subscription.planId;
+      const activePlan = await tx.plan.findUnique({
+        where: { planId: activePlanId },
+      });
+
+      this.logger.info({ activePlan });
+
+      let priceSnapshot = subscription.priceSnapshot?.toNumber();
+
+      if (activePlan?.monthlyPrice) {
+        priceSnapshot = this.getSubscriptionPriceAmount({
+          plan: activePlan!,
+          billingCycle: params.billingCycle,
+        });
+      }
+
+      const updated = await tx.tenantSubscription.update({
+        where: { tenantId: params.tenantId },
+        data: {
+          planId: activePlanId,
+          status: SubscriptionStatusEnum.ACTIVE,
+          currentPeriodStart: now,
+          currentPeriodEnd: newEnd,
+          nextBillingAt: newEnd,
+          lastBillingAt: now,
+          retryCount: 0, // reset recurring payment retry count
+          cancelAtPeriodEnd: false,
+          cancelledAt: null,
+          suspendedAt: null,
+          pastDueAt: null,
+          pendingPlanId: null,
+          pendingPlanEffectiveAt: null,
+          latestPaymentId: payment.paymentId,
+          paymentProvider: params.provider,
+          ...(params.tapCardId && {
+            tapCardId: params.tapCardId,
+          }),
+          ...(params.tapCustomerId && {
+            tapCustomerId: params.tapCustomerId,
+          }),
+          ...(params.tapPaymentAgreementId && {
+            tapPaymentAgreementId: params.tapPaymentAgreementId,
+          }),
+          priceSnapshot,
+          quotaSnapshot: activePlan
+            ? ({
+                maxProjects: activePlan.maxProjects,
+                maxUsers: activePlan.maxUsers,
+                maxSessions: activePlan.maxSessions,
+                maxRequests: activePlan.maxRequests,
+              } as any)
+            : subscription.quotaSnapshot,
+        },
+      });
+
+      this.logger.info({ updated });
+
+      const eventType = this.getSubscriptionActivationEventType(
+        subscription.status as SubscriptionStatusEnum,
+      );
+
+      await tx.subscriptionEvent.create({
+        data: {
+          subscriptionId: subscription.subscriptionId,
+          type: eventType,
+          fromPlanId: subscription.planId,
+          toPlanId: activePlanId,
+          meta: {
+            amount: params.amount,
+            currency: params.currency,
+            providerPaymentRef: params.providerPaymentRef,
+          },
+        },
+      });
+
+      return updated;
+    });
+  }
+
+  async markPaymentFailed(params: {
+    tenantId: string;
+    providerEventId: string;
+    amount: number;
+    currency: string;
+    failureReason?: string;
+    rawPayload?: Prisma.JsonValue;
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      const subscription = await tx.tenantSubscription.findUnique({
+        where: { tenantId: params.tenantId },
+      });
+
+      this.logger.info({ subscription });
+
+      if (!subscription) throw new NotFoundException('Subscription not found');
+
+      const existingSubscription = await tx.subscriptionPayment.findUnique({
+        where: { providerEventId: params.providerEventId },
+      });
+
+      this.logger.info({ existingSubscription });
+
+      if (existingSubscription) return existingSubscription;
+
+      // check if retry count exceeded 3
+      if (subscription.retryCount >= 3) {
+        return subscription;
+      }
+
+      const now = new Date();
+
+      const payment = await tx.subscriptionPayment.create({
+        data: {
+          subscriptionId: subscription.subscriptionId,
+          provider: 'tap',
+          providerEventId: params.providerEventId,
+          amount: params.amount,
+          currency: params.currency,
+          status: PaymentStatusEnum.FAILED,
+          rawPayload: params.rawPayload ?? undefined,
+          failedAt: now,
+          failureReason: params.failureReason,
+        },
+      });
+
+      this.logger.info({ payment });
+
+      await tx.tenantSubscription.update({
+        where: { tenantId: params.tenantId },
+        data: {
+          status: SubscriptionStatusEnum.ACTIVE,
+          pastDueAt: now,
+          lastGraceWarningAt: now,
+          // increment retry count
+          retryCount: { increment: 1 },
+          latestPaymentId: payment.paymentId,
+        },
+      });
+
+      await tx.subscriptionEvent.create({
+        data: {
+          subscriptionId: subscription.subscriptionId,
+          type: SubscriptionEventTypeEnum.PAYMENT_FAILED,
+          fromPlanId: subscription.planId,
+          meta: {
+            providerEventId: params.providerEventId,
+            reason: params.failureReason,
+          },
+        },
+      });
+
+      return payment;
+    });
+  }
+
+  // cronjob function
+
   async movePastDueExpiredSuspended() {
     const now = new Date();
 
@@ -653,8 +706,6 @@ export class SubscriptionsService {
           status: SubscriptionStatusEnum.PAST_DUE,
         },
       });
-
-    this.logger.info({ pastDueCount: pastDueSubs.length });
 
     if (pastDueSubs?.length) {
       await this.prisma.subscriptionEvent.createMany({
@@ -683,7 +734,10 @@ export class SubscriptionsService {
       },
     });
 
-    this.logger.info({ suspendedCount: suspended.length });
+    this.logger.info({
+      suspendedCount: suspended.length,
+      pastDueCount: pastDueSubs.length,
+    });
 
     if (suspended?.length) {
       await this.prisma.subscriptionEvent.createMany({
@@ -696,60 +750,6 @@ export class SubscriptionsService {
         }),
       });
     }
-  }
-
-  async resubscribe(tenantId: string) {
-    return this.prisma.$transaction(async (tx) => {
-      const subscription = await tx.tenantSubscription.findUnique({
-        where: { tenantId },
-        include: { plan: true, tenant: true },
-      });
-
-      this.logger.info({ subscription });
-
-      if (!subscription) throw new NotFoundException('Subscription not found');
-
-      if (subscription.status !== SubscriptionStatusEnum.SUSPENDED) {
-        throw new BadRequestException(
-          'Only suspended subscriptions can resubscribe',
-        );
-      }
-
-      const reactivationWindow = 60 * 24 * 60 * 60 * 1000; // 60 days
-      const suspendedAt = subscription.suspendedAt ?? subscription.updatedAt;
-
-      if (Date.now() - suspendedAt.getTime() > reactivationWindow) {
-        throw new BadRequestException('Reactivation window expired');
-      }
-
-      await tx.tenantSubscription.update({
-        where: { tenantId },
-        data: {
-          status: SubscriptionStatusEnum.ACTIVE,
-          suspendedAt: null,
-          pastDueAt: null,
-          cancelAtPeriodEnd: false,
-          retryCount: 0, // reset recurring payment retry count
-        },
-      });
-
-      await tx.tenant.update({
-        where: { tenantId: subscription.tenantId },
-        data: {
-          suspendedAt: null,
-        },
-      });
-
-      await tx.subscriptionEvent.create({
-        data: {
-          subscriptionId: subscription.subscriptionId,
-          type: SubscriptionEventTypeEnum.REACTIVATED,
-          fromPlanId: subscription.planId,
-        },
-      });
-
-      return { success: true };
-    });
   }
 
   async getSubscriptionByTenantId(tenantId: string) {
@@ -767,6 +767,38 @@ export class SubscriptionsService {
     }
 
     return subscription;
+  }
+
+  // helper methods
+
+  private getSubscriptionPriceAmount(params: {
+    plan: Plan;
+    billingCycle: BillingCycleEnum;
+  }): number {
+    return params.billingCycle === BillingCycleEnum.MONTHLY
+      ? params.plan.monthlyPrice.toNumber()
+      : params.plan.yearlyPrice.toNumber();
+  }
+
+  private getSubscriptionActivationEventType(
+    currentStatus: SubscriptionStatusEnum,
+  ): SubscriptionEventTypeEnum {
+    if (currentStatus === SubscriptionStatusEnum.SUSPENDED) {
+      return SubscriptionEventTypeEnum.REACTIVATED;
+    }
+
+    if (currentStatus === SubscriptionStatusEnum.TRIALING) {
+      return SubscriptionEventTypeEnum.PAYMENT_SUCCEEDED;
+    }
+
+    if (
+      currentStatus === SubscriptionStatusEnum.ACTIVE ||
+      currentStatus === SubscriptionStatusEnum.PAST_DUE
+    ) {
+      return SubscriptionEventTypeEnum.RENEWED;
+    }
+
+    return SubscriptionEventTypeEnum.RENEWED;
   }
 
   // controller methods

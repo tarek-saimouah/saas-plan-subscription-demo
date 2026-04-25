@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpgradePlanResponseDto {
+export class RequestPlanSubscriptionResponseDto {
   @ApiProperty()
   transactionUrl: string;
 }

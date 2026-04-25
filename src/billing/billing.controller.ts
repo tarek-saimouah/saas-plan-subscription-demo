@@ -25,8 +25,9 @@ import { PlanUserResponseDto } from 'src/plans';
 import { PlansService } from 'src/plans/plans.service';
 import {
   DowngradePlanDto,
+  ResubscribeSuspendedPlanDto,
   UpgradePlanDto,
-  UpgradePlanResponseDto,
+  RequestPlanSubscriptionResponseDto,
 } from './dto';
 import { BillingService } from './billing.service';
 
@@ -58,7 +59,7 @@ export class BillingController {
     summary: 'Roles: (user)',
     description: 'upgrade plan',
   })
-  @ApiCreatedDataResponse(UpgradePlanResponseDto)
+  @ApiCreatedDataResponse(RequestPlanSubscriptionResponseDto)
   @ApiBadRequestResponse({
     type: ErrorResponseDto,
   })
@@ -68,7 +69,7 @@ export class BillingController {
   async upgradePlan(
     @Body() payload: UpgradePlanDto,
     @DecodedUser() decodedUser: JwtDecodedEntity,
-  ): Promise<DataResponse<UpgradePlanResponseDto>> {
+  ): Promise<DataResponse<RequestPlanSubscriptionResponseDto>> {
     const created = await this.billingService.upgradePlan(
       decodedUser.tenantId!,
       payload,
@@ -80,7 +81,7 @@ export class BillingController {
     summary: 'Roles: (user)',
     description: 'enterprise plan subscribe',
   })
-  @ApiCreatedDataResponse(UpgradePlanResponseDto)
+  @ApiCreatedDataResponse(RequestPlanSubscriptionResponseDto)
   @ApiBadRequestResponse({
     type: ErrorResponseDto,
   })
@@ -90,7 +91,7 @@ export class BillingController {
   async subscripeToEnterprisePlan(
     @Body() payload: UpgradePlanDto,
     @DecodedUser() decodedUser: JwtDecodedEntity,
-  ): Promise<DataResponse<UpgradePlanResponseDto>> {
+  ): Promise<DataResponse<RequestPlanSubscriptionResponseDto>> {
     const created = await this.billingService.subscripeToEnterprisePlan(
       decodedUser.tenantId!,
       payload,
@@ -117,6 +118,45 @@ export class BillingController {
       decodedUser.tenantId!,
       payload,
     );
+  }
+
+  @ApiOperation({
+    summary: 'Roles: (user)',
+    description: 'resubscribe suspended plan',
+  })
+  @ApiCreatedDataResponse(RequestPlanSubscriptionResponseDto)
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+  })
+  // permissions
+  @Roles(['user'])
+  @Post('plan-resubscribe')
+  async resubscribeSuspendedPlan(
+    @Body() payload: ResubscribeSuspendedPlanDto,
+    @DecodedUser() decodedUser: JwtDecodedEntity,
+  ): Promise<DataResponse<RequestPlanSubscriptionResponseDto>> {
+    const created = await this.billingService.resubscribeSuspendedPlan(
+      decodedUser.tenantId!,
+      payload,
+    );
+    return new DataResponse(created);
+  }
+
+  @ApiOperation({
+    summary: 'Roles: (user)',
+    description: 'cancel current subscription plan',
+  })
+  @ApiResponse({ type: MessageResponseDto })
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+  })
+  // permissions
+  @Roles(['user'])
+  @Post('subscription-plan-cancel')
+  cancelSubscriptionPlan(
+    @DecodedUser() decodedUser: JwtDecodedEntity,
+  ): Promise<MessageResponseDto> {
+    return this.billingService.cancelSubscriptionPlan(decodedUser.tenantId!);
   }
 
   // this endpoint is just to view a message after charge redirect

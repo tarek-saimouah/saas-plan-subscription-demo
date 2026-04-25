@@ -19,6 +19,18 @@ export function getEndOfDay(date: Date): Date {
 }
 
 /**
+ * Add days to Date object.
+ * @param date - The date as Date object.
+ * @param days - The number of days to add.
+ * @returns Date object.
+ */
+export function addDaysToDate(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+/**
  * Returns the first day of month.
  * @param date - The date as Date object.
  * @returns First day of month as Date object.

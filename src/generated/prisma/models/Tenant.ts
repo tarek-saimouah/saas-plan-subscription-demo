@@ -28,7 +28,6 @@ export type TenantMinAggregateOutputType = {
   tenantId: string | null
   name: string | null
   ownerId: string | null
-  suspendedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -37,7 +36,6 @@ export type TenantMaxAggregateOutputType = {
   tenantId: string | null
   name: string | null
   ownerId: string | null
-  suspendedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,7 +44,6 @@ export type TenantCountAggregateOutputType = {
   tenantId: number
   name: number
   ownerId: number
-  suspendedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -57,7 +54,6 @@ export type TenantMinAggregateInputType = {
   tenantId?: true
   name?: true
   ownerId?: true
-  suspendedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -66,7 +62,6 @@ export type TenantMaxAggregateInputType = {
   tenantId?: true
   name?: true
   ownerId?: true
-  suspendedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -75,7 +70,6 @@ export type TenantCountAggregateInputType = {
   tenantId?: true
   name?: true
   ownerId?: true
-  suspendedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -157,7 +151,6 @@ export type TenantGroupByOutputType = {
   tenantId: string
   name: string
   ownerId: string
-  suspendedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: TenantCountAggregateOutputType | null
@@ -187,7 +180,6 @@ export type TenantWhereInput = {
   tenantId?: Prisma.UuidFilter<"Tenant"> | string
   name?: Prisma.StringFilter<"Tenant"> | string
   ownerId?: Prisma.UuidFilter<"Tenant"> | string
-  suspendedAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -201,7 +193,6 @@ export type TenantOrderByWithRelationInput = {
   tenantId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
-  suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   owner?: Prisma.UserOrderByWithRelationInput
@@ -218,7 +209,6 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.TenantWhereInput | Prisma.TenantWhereInput[]
   OR?: Prisma.TenantWhereInput[]
   NOT?: Prisma.TenantWhereInput | Prisma.TenantWhereInput[]
-  suspendedAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -232,7 +222,6 @@ export type TenantOrderByWithAggregationInput = {
   tenantId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
-  suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TenantCountOrderByAggregateInput
@@ -247,7 +236,6 @@ export type TenantScalarWhereWithAggregatesInput = {
   tenantId?: Prisma.UuidWithAggregatesFilter<"Tenant"> | string
   name?: Prisma.StringWithAggregatesFilter<"Tenant"> | string
   ownerId?: Prisma.UuidWithAggregatesFilter<"Tenant"> | string
-  suspendedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tenant"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Tenant"> | Date | string
 }
@@ -255,7 +243,6 @@ export type TenantScalarWhereWithAggregatesInput = {
 export type TenantCreateInput = {
   tenantId?: string
   name: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutTenantInput
@@ -269,7 +256,6 @@ export type TenantUncheckedCreateInput = {
   tenantId?: string
   name: string
   ownerId: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subscription?: Prisma.TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput
@@ -281,7 +267,6 @@ export type TenantUncheckedCreateInput = {
 export type TenantUpdateInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutTenantNestedInput
@@ -295,7 +280,6 @@ export type TenantUncheckedUpdateInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscription?: Prisma.TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
@@ -308,7 +292,6 @@ export type TenantCreateManyInput = {
   tenantId?: string
   name: string
   ownerId: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -316,7 +299,6 @@ export type TenantCreateManyInput = {
 export type TenantUpdateManyMutationInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -325,7 +307,6 @@ export type TenantUncheckedUpdateManyInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -344,7 +325,6 @@ export type TenantCountOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
-  suspendedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -353,7 +333,6 @@ export type TenantMaxOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
-  suspendedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -362,7 +341,6 @@ export type TenantMinOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
-  suspendedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -460,7 +438,6 @@ export type TenantUncheckedUpdateOneWithoutOwnerNestedInput = {
 export type TenantCreateWithoutEnterprisePlanRequestsInput = {
   tenantId?: string
   name: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutTenantInput
@@ -473,7 +450,6 @@ export type TenantUncheckedCreateWithoutEnterprisePlanRequestsInput = {
   tenantId?: string
   name: string
   ownerId: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subscription?: Prisma.TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput
@@ -500,7 +476,6 @@ export type TenantUpdateToOneWithWhereWithoutEnterprisePlanRequestsInput = {
 export type TenantUpdateWithoutEnterprisePlanRequestsInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutTenantNestedInput
@@ -513,7 +488,6 @@ export type TenantUncheckedUpdateWithoutEnterprisePlanRequestsInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscription?: Prisma.TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
@@ -524,7 +498,6 @@ export type TenantUncheckedUpdateWithoutEnterprisePlanRequestsInput = {
 export type TenantCreateWithoutEnterprisePlansInput = {
   tenantId?: string
   name: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutTenantInput
@@ -537,7 +510,6 @@ export type TenantUncheckedCreateWithoutEnterprisePlansInput = {
   tenantId?: string
   name: string
   ownerId: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subscription?: Prisma.TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput
@@ -564,7 +536,6 @@ export type TenantUpdateToOneWithWhereWithoutEnterprisePlansInput = {
 export type TenantUpdateWithoutEnterprisePlansInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutTenantNestedInput
@@ -577,7 +548,6 @@ export type TenantUncheckedUpdateWithoutEnterprisePlansInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscription?: Prisma.TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
@@ -588,7 +558,6 @@ export type TenantUncheckedUpdateWithoutEnterprisePlansInput = {
 export type TenantCreateWithoutSubscriptionInput = {
   tenantId?: string
   name: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutTenantInput
@@ -601,7 +570,6 @@ export type TenantUncheckedCreateWithoutSubscriptionInput = {
   tenantId?: string
   name: string
   ownerId: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   enterprisePlans?: Prisma.PlanUncheckedCreateNestedManyWithoutTenantInput
@@ -628,7 +596,6 @@ export type TenantUpdateToOneWithWhereWithoutSubscriptionInput = {
 export type TenantUpdateWithoutSubscriptionInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutTenantNestedInput
@@ -641,7 +608,6 @@ export type TenantUncheckedUpdateWithoutSubscriptionInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enterprisePlans?: Prisma.PlanUncheckedUpdateManyWithoutTenantNestedInput
@@ -652,7 +618,6 @@ export type TenantUncheckedUpdateWithoutSubscriptionInput = {
 export type TenantCreateWithoutUsageInput = {
   tenantId?: string
   name: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutTenantInput
@@ -665,7 +630,6 @@ export type TenantUncheckedCreateWithoutUsageInput = {
   tenantId?: string
   name: string
   ownerId: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subscription?: Prisma.TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput
@@ -692,7 +656,6 @@ export type TenantUpdateToOneWithWhereWithoutUsageInput = {
 export type TenantUpdateWithoutUsageInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutTenantNestedInput
@@ -705,7 +668,6 @@ export type TenantUncheckedUpdateWithoutUsageInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscription?: Prisma.TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
@@ -716,7 +678,6 @@ export type TenantUncheckedUpdateWithoutUsageInput = {
 export type TenantCreateWithoutOwnerInput = {
   tenantId?: string
   name: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subscription?: Prisma.TenantSubscriptionCreateNestedOneWithoutTenantInput
@@ -728,7 +689,6 @@ export type TenantCreateWithoutOwnerInput = {
 export type TenantUncheckedCreateWithoutOwnerInput = {
   tenantId?: string
   name: string
-  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subscription?: Prisma.TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput
@@ -756,7 +716,6 @@ export type TenantUpdateToOneWithWhereWithoutOwnerInput = {
 export type TenantUpdateWithoutOwnerInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscription?: Prisma.TenantSubscriptionUpdateOneWithoutTenantNestedInput
@@ -768,7 +727,6 @@ export type TenantUpdateWithoutOwnerInput = {
 export type TenantUncheckedUpdateWithoutOwnerInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscription?: Prisma.TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
@@ -821,7 +779,6 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   tenantId?: boolean
   name?: boolean
   ownerId?: boolean
-  suspendedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -836,7 +793,6 @@ export type TenantSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   tenantId?: boolean
   name?: boolean
   ownerId?: boolean
-  suspendedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -846,7 +802,6 @@ export type TenantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   tenantId?: boolean
   name?: boolean
   ownerId?: boolean
-  suspendedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -856,12 +811,11 @@ export type TenantSelectScalar = {
   tenantId?: boolean
   name?: boolean
   ownerId?: boolean
-  suspendedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TenantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"tenantId" | "name" | "ownerId" | "suspendedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
+export type TenantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"tenantId" | "name" | "ownerId" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
 export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   subscription?: boolean | Prisma.Tenant$subscriptionArgs<ExtArgs>
@@ -890,7 +844,6 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     tenantId: string
     name: string
     ownerId: string
-    suspendedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["tenant"]>
@@ -1324,7 +1277,6 @@ export interface TenantFieldRefs {
   readonly tenantId: Prisma.FieldRef<"Tenant", 'String'>
   readonly name: Prisma.FieldRef<"Tenant", 'String'>
   readonly ownerId: Prisma.FieldRef<"Tenant", 'String'>
-  readonly suspendedAt: Prisma.FieldRef<"Tenant", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Tenant", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Tenant", 'DateTime'>
 }

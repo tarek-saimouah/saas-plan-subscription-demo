@@ -139,7 +139,6 @@ CREATE TABLE "tenants" (
     "tanant_id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "owner_id" UUID NOT NULL,
-    "suspended_at" TIMESTAMPTZ(6),
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
