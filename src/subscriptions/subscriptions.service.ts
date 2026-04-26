@@ -728,7 +728,7 @@ export class SubscriptionsService {
         trialEndsAt: {
           lte: now,
         },
-        // must not habe TRIAL_EXPIRED event
+        // must not have TRIAL_EXPIRED event
         events: { none: { type: SubscriptionEventTypeEnum.TRIAL_EXPIRED } },
       },
       include: {
