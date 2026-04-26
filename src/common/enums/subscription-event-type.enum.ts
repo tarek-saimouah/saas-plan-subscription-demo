@@ -1,6 +1,7 @@
 export enum SubscriptionEventTypeEnum {
   TRIAL_STARTED = 'trial_started',
   TRIAL_EXPIRED = 'trial_expired',
+  EXPIRED = 'expired',
   PAYMENT_PENDING = 'payment_pending',
   PAYMENT_SUCCEEDED = 'payment_succeeded',
   PAYMENT_FAILED = 'payment_failed',

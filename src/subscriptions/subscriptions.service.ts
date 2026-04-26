@@ -385,12 +385,20 @@ export class SubscriptionsService {
 
       if (!subscription) throw new NotFoundException('Subscription not found');
 
+      if (
+        subscription.status !== SubscriptionStatusEnum.ACTIVE &&
+        subscription.status !== SubscriptionStatusEnum.PAST_DUE
+      ) {
+        throw new BadRequestException(
+          'Only active and past due subscriptions can be cancelled',
+        );
+      }
+
       const updated = await tx.tenantSubscription.update({
         where: { tenantId },
         data: {
           cancelAtPeriodEnd: true,
-          cancelledAt: new Date(),
-          status: SubscriptionStatusEnum.CANCELLED,
+          // keep ACTIVE until currentPeriodEnd
         },
       });
 
@@ -401,6 +409,10 @@ export class SubscriptionsService {
           subscriptionId: subscription.subscriptionId,
           type: SubscriptionEventTypeEnum.CANCELLED,
           fromPlanId: subscription.planId,
+          meta: {
+            cancelAtPeriodEnd: true,
+            effectiveAt: subscription.currentPeriodEnd,
+          },
         },
       });
 
@@ -451,7 +463,6 @@ export class SubscriptionsService {
           plan: subscription.plan,
           billingCycle: params.billingCycle,
         }),
-        // amount: subscription.plan.priceCents,
         currency: subscription.plan.currency,
       };
     });
@@ -594,18 +605,36 @@ export class SubscriptionsService {
         subscription.status as SubscriptionStatusEnum,
       );
 
-      await tx.subscriptionEvent.create({
-        data: {
-          subscriptionId: subscription.subscriptionId,
-          type: eventType,
-          fromPlanId: subscription.planId,
-          toPlanId: activePlanId,
-          meta: {
-            amount: params.amount,
-            currency: params.currency,
-            providerPaymentRef: params.providerPaymentRef,
+      await tx.subscriptionEvent.createMany({
+        data: [
+          {
+            subscriptionId: subscription.subscriptionId,
+            type: eventType,
+            fromPlanId: subscription.planId,
+            toPlanId: activePlanId,
+            meta: {
+              amount: params.amount,
+              currency: params.currency,
+              providerPaymentRef: params.providerPaymentRef,
+            },
           },
-        },
+          // if subscription status was TRIALING create upgrade event
+          ...(subscription.status === SubscriptionStatusEnum.TRIALING
+            ? [
+                {
+                  subscriptionId: subscription.subscriptionId,
+                  type: SubscriptionEventTypeEnum.UPGRADED,
+                  fromPlanId: subscription.planId,
+                  toPlanId: activePlanId,
+                  meta: {
+                    amount: params.amount,
+                    currency: params.currency,
+                    providerPaymentRef: params.providerPaymentRef,
+                  },
+                },
+              ]
+            : []),
+        ],
       });
 
       return updated;
@@ -690,8 +719,41 @@ export class SubscriptionsService {
 
   // cronjob function
 
-  async movePastDueExpiredSuspended() {
+  async processTrialExpirations() {
     const now = new Date();
+
+    const trials = await this.prisma.tenantSubscription.findMany({
+      where: {
+        status: SubscriptionStatusEnum.TRIALING,
+        trialEndsAt: {
+          lte: now,
+        },
+        // must not habe TRIAL_EXPIRED event
+        events: { none: { type: SubscriptionEventTypeEnum.TRIAL_EXPIRED } },
+      },
+      include: {
+        plan: true,
+      },
+    });
+
+    await this.prisma.subscriptionEvent.createMany({
+      data: trials.map((sub) => {
+        return {
+          subscriptionId: sub.subscriptionId,
+          type: SubscriptionEventTypeEnum.TRIAL_EXPIRED,
+          fromPlanId: sub.planId,
+          toPlanId: sub.planId,
+          meta: {
+            trialEndedAt: sub.trialEndsAt,
+          },
+        };
+      }),
+    });
+  }
+
+  async movePastDueSubscriptions() {
+    const now = new Date();
+    const expirationWindowMs = 3 * 24 * 60 * 60 * 1000; // 3 days
 
     // 3 days after failed renewal -> PAST_DUE
     const pastDueSubs =
@@ -700,7 +762,7 @@ export class SubscriptionsService {
           status: SubscriptionStatusEnum.ACTIVE,
           pastDueAt: { not: null },
           updatedAt: {
-            lte: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+            lte: new Date(now.getTime() - expirationWindowMs),
           },
         },
         data: {
@@ -720,13 +782,22 @@ export class SubscriptionsService {
       });
     }
 
+    this.logger.info({
+      pastDueCount: pastDueSubs.length,
+    });
+  }
+
+  async moveSuspendedSubscriptions() {
+    const now = new Date();
+    const expirationWindowMs = 7 * 24 * 60 * 60 * 1000; // 7 days
+
     // 7 days after failure -> SUSPENDED
     const suspended = await this.prisma.tenantSubscription.updateManyAndReturn({
       where: {
         status: SubscriptionStatusEnum.PAST_DUE,
         pastDueAt: { not: null },
         updatedAt: {
-          lte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+          lte: new Date(now.getTime() - expirationWindowMs),
         },
       },
       data: {
@@ -735,10 +806,7 @@ export class SubscriptionsService {
       },
     });
 
-    this.logger.info({
-      suspendedCount: suspended.length,
-      pastDueCount: pastDueSubs.length,
-    });
+    this.logger.info({ suspendedCount: suspended.length });
 
     if (suspended?.length) {
       await this.prisma.subscriptionEvent.createMany({
@@ -747,6 +815,87 @@ export class SubscriptionsService {
             subscriptionId: sub.subscriptionId,
             type: SubscriptionEventTypeEnum.SUSPENDED,
             fromPlanId: sub.planId,
+          };
+        }),
+      });
+    }
+  }
+
+  async moveExpiredSubscriptions() {
+    const now = new Date();
+    const expirationWindowMs = 60 * 24 * 60 * 60 * 1000; // 60 days
+
+    const subscriptions = await this.prisma.tenantSubscription.findMany({
+      where: {
+        status: SubscriptionStatusEnum.SUSPENDED,
+        suspendedAt: { not: null },
+      },
+    });
+
+    for (const sub of subscriptions) {
+      const isExpired =
+        now.getTime() - sub.suspendedAt!.getTime() > expirationWindowMs;
+
+      if (!isExpired) continue;
+
+      await this.prisma.$transaction(async (tx) => {
+        await tx.tenantSubscription.update({
+          where: { tenantId: sub.tenantId },
+          data: {
+            status: SubscriptionStatusEnum.EXPIRED,
+            nextBillingAt: null,
+          },
+        });
+
+        await tx.subscriptionEvent.create({
+          data: {
+            subscriptionId: sub.subscriptionId,
+            type: SubscriptionEventTypeEnum.EXPIRED,
+            fromPlanId: sub.planId,
+            meta: {
+              suspendedAt: sub.suspendedAt,
+              expiredAt: now,
+            },
+          },
+        });
+      });
+    }
+  }
+
+  async moveCancelledSubscriptions() {
+    const now = new Date();
+
+    // now > currentPeriodEnd and cancelAtPeriodEnd flag is true -> CANCELLED
+    const cancelled = await this.prisma.tenantSubscription.updateManyAndReturn({
+      where: {
+        status: {
+          in: [SubscriptionStatusEnum.ACTIVE, SubscriptionStatusEnum.PAST_DUE],
+        },
+        cancelAtPeriodEnd: true,
+        currentPeriodEnd: {
+          lte: now,
+        },
+      },
+      data: {
+        status: SubscriptionStatusEnum.CANCELLED,
+        cancelledAt: now,
+        nextBillingAt: null,
+      },
+    });
+
+    this.logger.info({ cancelledCount: cancelled.length });
+
+    if (cancelled?.length) {
+      await this.prisma.subscriptionEvent.createMany({
+        data: cancelled.map((sub) => {
+          return {
+            subscriptionId: sub.subscriptionId,
+            type: SubscriptionEventTypeEnum.CANCELLED,
+            fromPlanId: sub.planId,
+            meta: {
+              effectiveAt: sub.currentPeriodEnd,
+              finalizedByCron: true,
+            },
           };
         }),
       });

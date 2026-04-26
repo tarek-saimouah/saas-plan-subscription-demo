@@ -78,7 +78,7 @@ model SubscriptionEvent {
   eventId        String @id() @default(uuid()) @map("event_id") @db.Uuid
   subscriptionId String @map("subscription_id") @db.Uuid
 
-  type       String // trial_started, trial_expired, payment_pending, payment_succeeded, payment_failed, renewed, upgraded, downgraded, downgrade_scheduled, cancelled, past_due, suspended, reactivated, manual_adjustment, enterprise_plan_created, enterprise_plan_updated
+  type       String // trial_started, trial_expired, expired, payment_pending, payment_succeeded, payment_failed, renewed, upgraded, downgraded, downgrade_scheduled, cancelled, past_due, suspended, reactivated, manual_adjustment, enterprise_plan_created, enterprise_plan_updated
   fromPlanId String? @map("fromPlanId") @db.Uuid
   toPlanId   String? @map("toPlanId") @db.Uuid
 

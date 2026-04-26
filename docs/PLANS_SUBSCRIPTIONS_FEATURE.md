@@ -44,7 +44,7 @@ The payment ledger is append-only and de-duplicates by `provider_event_id` and `
 
 ### `subscription_events`
 
-Business events are stored separately from payment rows, including trial start, payment pending, payment failed, renewals, scheduled downgrades, applied downgrades, cancellation, past due, suspension, and reactivation (`prisma/schema/subscriptions.prisma`, `src/common/enums/subscription-event-type.enum.ts`).
+Business events are stored separately from payment rows, including trial start, trial expiration, payment pending, payment failed, renewals, upgrades, scheduled downgrades, applied downgrades, cancellation, past due, suspension, expiration, and reactivation (`prisma/schema/subscriptions.prisma`, `src/common/enums/subscription-event-type.enum.ts`).
 
 ## Plan Management
 
@@ -102,12 +102,13 @@ Paid standard subscriptions reuse the same `tenant_subscriptions` row. The tenan
 - Downgrades are deferred: `pendingPlanEffectiveAt` is set to `currentPeriodEnd`, and cron applies the downgrade once due (`src/subscriptions/subscriptions.service.ts`, `src/billing/billing-cron.service.ts`).
 - Enterprise custom plan subscription uses the same upgrade path but validates `plan.kind === enterprise_custom` and `plan.tenantId === tenantId` before payment creation (`src/billing/billing.service.ts`).
 
-### Cancellation, suspension, and “expiration”
+### Cancellation, suspension, and expiration
 
-- Cancellation sets `cancelAtPeriodEnd = true`, writes `cancelledAt`, and immediately flips `status` to `cancelled` (`src/subscriptions/subscriptions.service.ts`).
-- Recurring billing cron excludes `cancelAtPeriodEnd = true`, so cancelled subscriptions stop renewing (`src/billing/billing-cron.service.ts`).
-- `SubscriptionGuard` blocks cancelled subscriptions on protected routes (`src/common/guards/subscription.guard.ts`).
-- `SubscriptionStatusEnum.EXPIRED` exists (`src/common/enums/subscription-status.enum.ts`), but no service currently writes `expired`; there is also no implemented `trial_expired` event emission. The practical terminal states in current code are `cancelled` and `suspended`.
+- User cancellation is now a period-end cancellation request: it sets `cancelAtPeriodEnd = true` and leaves the subscription in `active` or `past_due` until `currentPeriodEnd` (`src/subscriptions/subscriptions.service.ts`).
+- Recurring billing cron excludes `cancelAtPeriodEnd = true`, so pending cancellations do not renew again (`src/billing/billing-cron.service.ts`).
+- Lifecycle cron later finalizes those rows into `status = cancelled`, sets `cancelledAt`, clears `nextBillingAt`, and writes a second cancellation event tagged with `finalizedByCron` (`src/subscriptions/subscriptions.service.ts`).
+- `SubscriptionGuard` blocks both `cancelled` and `expired` subscriptions on protected routes (`src/common/guards/subscription.guard.ts`).
+- `expired` is now a real terminal state: suspended subscriptions older than 60 days are moved to `expired` and emit an `expired` event (`src/subscriptions/subscriptions.service.ts`).
 
 ## Subscription State Machine
 
@@ -118,17 +119,20 @@ Paid standard subscriptions reuse the same `tenant_subscriptions` row. The tenan
 - `past_due`
 - `suspended`
 - `cancelled`
-- `expired` enum only, not transitioned into by current services
+- `expired`
 
 ### Transitions actually implemented
 
 - `verification -> trialing`: `startTrialForNewUser()` (`src/subscriptions/subscriptions.service.ts`)
+- `trialing -> trialing + trial_expired event`: lifecycle cron emits `trial_expired` once `trialEndsAt <= now`, without changing status (`src/subscriptions/subscriptions.service.ts`)
 - `trialing -> active`: successful first payment webhook (`src/subscriptions/subscriptions.service.ts`)
-- `active -> active`: renewal success, paid upgrade activation, or payment recovery from `past_due` all write `active` (`src/subscriptions/subscriptions.service.ts`)
-- `active -> cancelled`: user cancellation (`src/subscriptions/subscriptions.service.ts`)
+- `active|past_due|suspended -> active`: renewal success, paid upgrade activation, or payment recovery all write `active` (`src/subscriptions/subscriptions.service.ts`)
+- `active|past_due -> active|past_due + cancelAtPeriodEnd`: user cancellation request schedules end-of-period cancellation (`src/subscriptions/subscriptions.service.ts`)
 - `active -> active + pastDueAt + retryCount++`: failed charge records failure but keeps status `active` initially (`src/subscriptions/subscriptions.service.ts`)
 - `active with stale pastDueAt -> past_due`: lifecycle cron after 3 days (`src/subscriptions/subscriptions.service.ts`)
-- `past_due -> suspended`: lifecycle cron after 7 days (`src/subscriptions/subscriptions.service.ts`)
+- `past_due -> suspended`: lifecycle cron after 7 days in `past_due`, based on `updatedAt` (`src/subscriptions/subscriptions.service.ts`)
+- `suspended -> expired`: lifecycle cron after 60 days from `suspendedAt` (`src/subscriptions/subscriptions.service.ts`)
+- `active|past_due with cancelAtPeriodEnd and due period end -> cancelled`: lifecycle cron finalization (`src/subscriptions/subscriptions.service.ts`)
 - `suspended -> active`: successful resubscribe payment (`src/subscriptions/subscriptions.service.ts`)
 - `active -> downgraded active`: scheduled downgrade cron swaps `planId` and clears pending plan (`src/subscriptions/subscriptions.service.ts`)
 
@@ -158,7 +162,7 @@ Paid standard subscriptions reuse the same `tenant_subscriptions` row. The tenan
 
 - Tap posts to `POST /webhooks/tap-charge` with header `hashstring` (`src/billing/webhook/billing-webhook.controller.ts`)
 - Controller validates HMAC signature; on success it asynchronously dispatches `handleEvent()` and returns `200` immediately (`src/billing/webhook/billing-webhook.controller.ts`)
-- Success path stores payment, activates plan, copies recurring fields, clears pending-plan fields, resets retries, and writes one event (`src/subscriptions/subscriptions.service.ts`)
+- Success path stores payment, activates plan, copies recurring fields, clears pending-plan fields, resets retries, and writes activation events (`src/subscriptions/subscriptions.service.ts`)
 
 ### 4. Renewal
 
@@ -169,7 +173,7 @@ Paid standard subscriptions reuse the same `tenant_subscriptions` row. The tenan
 ### 5. Failed renewal and grace handling
 
 - Webhook failure creates a failed payment row keyed by `providerEventId`, increments `retryCount`, sets `pastDueAt`, and writes `payment_failed` (`src/subscriptions/subscriptions.service.ts`)
-- A separate 30-minute cron marks still-unresolved subscriptions `past_due` after 3 days and `suspended` after 7 days (`src/subscriptions/subscriptions.service.ts`, `src/billing/billing-cron.service.ts`)
+- A separate 30-minute cron emits `trial_expired`, marks still-unresolved subscriptions `past_due` after 3 days, `suspended` after 7 days in `past_due`, and `expired` after 60 days in `suspended` (`src/subscriptions/subscriptions.service.ts`, `src/billing/billing-cron.service.ts`)
 
 ### 6. Resubscribe suspended plan
 
@@ -177,6 +181,13 @@ Paid standard subscriptions reuse the same `tenant_subscriptions` row. The tenan
 - Only `suspended` subscriptions are allowed, and the reactivation window is 60 days from `suspendedAt` or `updatedAt` (`src/subscriptions/subscriptions.service.ts`)
 - Payment is collected through the same “initial charge with save card” path (`src/billing/billing.service.ts`)
 - Webhook success writes `reactivated` and resets the subscription to `active` (`src/subscriptions/subscriptions.service.ts`)
+
+### 7. Cancel at period end
+
+- Route: `POST /v1/billing/subscription-plan-cancel`
+- Only `active` and `past_due` subscriptions are accepted (`src/subscriptions/subscriptions.service.ts`)
+- The request sets `cancelAtPeriodEnd = true` and writes a `cancelled` event whose metadata includes `effectiveAt = currentPeriodEnd` (`src/subscriptions/subscriptions.service.ts`)
+- The subscription remains usable until lifecycle cron sees `currentPeriodEnd <= now`, then switches it to `cancelled`, sets `cancelledAt`, clears `nextBillingAt`, and writes another `cancelled` event with `finalizedByCron = true` (`src/subscriptions/subscriptions.service.ts`)
 
 ## Subscription and Quota Usage Guards
 
@@ -268,7 +279,7 @@ All versioned billing routes are under `/v1/billing/*` except the Tap webhook, w
 - Auth: `Bearer <accessToken>`, role `user` (`src/billing/billing.controller.ts`)
 - Body: none
 - Response: success message (`src/billing/billing.service.ts`)
-- Effect: sets `status = cancelled`, `cancelAtPeriodEnd = true`, `cancelledAt = now` (`src/subscriptions/subscriptions.service.ts`)
+- Effect: schedules cancellation by setting `cancelAtPeriodEnd = true`; status is finalized later by lifecycle cron when `currentPeriodEnd <= now` (`src/subscriptions/subscriptions.service.ts`)
 
 ### `GET /v1/billing/after-charge`
 
@@ -359,7 +370,7 @@ sequenceDiagram
             Subs->>DB: check existing payment by providerEventId
             Subs->>DB: insert succeeded payment
             Subs->>DB: update tenant_subscriptions
-            Subs->>DB: insert subscription_events row
+            Subs->>DB: insert activation subscription_events rows
         else status in FAILED/CANCELLED/DECLINED
             Handler->>Subs: markPaymentFailed(...)
             Subs->>DB: check existing payment by providerEventId
@@ -422,16 +433,26 @@ For each row:
 
 ### 30-minute cron: lifecycle rules
 
-`movePastDueExpiredSuspended()` implements the post-failure timeline:
+`applySubscriptionLifecycleRules()` now runs five explicit stages:
 
+1. `processTrialExpirations()`
+2. `movePastDueSubscriptions()`
+3. `moveSuspendedSubscriptions()`
+4. `moveExpiredSubscriptions()`
+5. `moveCancelledSubscriptions()` (`src/billing/billing-cron.service.ts`)
+
+Implemented timeline:
+
+- when `trialing` and `trialEndsAt <= now`: emit `trial_expired` once, without changing subscription status (`src/subscriptions/subscriptions.service.ts`)
 - after 3 days: `active` with `pastDueAt != null` becomes `past_due` (`src/subscriptions/subscriptions.service.ts`)
-- after 7 days more in the current implementation, based on `updatedAt` while already `past_due`, it becomes `suspended` and sets `suspendedAt = now` (`src/subscriptions/subscriptions.service.ts`)
+- after 7 days in `past_due`, based on `updatedAt`: it becomes `suspended` and sets `suspendedAt = now` (`src/subscriptions/subscriptions.service.ts`)
+- after 60 days in `suspended`, based on `suspendedAt`: it becomes `expired` and clears `nextBillingAt` (`src/subscriptions/subscriptions.service.ts`)
+- when `cancelAtPeriodEnd = true` and `currentPeriodEnd <= now`: `active` or `past_due` becomes `cancelled`, `cancelledAt` is set, and `nextBillingAt` is cleared (`src/subscriptions/subscriptions.service.ts`)
 
-There is no cleanup job for:
+There is still no cleanup job for:
 
 - deleting cancelled subscriptions
 - archiving old payments/events
-- transitioning to `expired`
 - resetting usage counters on renewal
 
 ### Grace period and retries
@@ -470,20 +491,20 @@ sequenceDiagram
         Webhook->>Subs: activateAfterSuccessfulPayment(...)
         Subs->>DB: insert succeeded payment
         Subs->>DB: update subscription active/currentPeriodEnd/nextBillingAt
-        Subs->>DB: insert renewed or reactivated event
+        Subs->>DB: insert activation events
     else payment failed
         Webhook->>Subs: markPaymentFailed(...)
         Subs->>DB: insert failed payment
         Subs->>DB: update retryCount/pastDueAt
         Subs->>DB: insert payment_failed event
-        Cron->>Subs: movePastDueExpiredSuspended() on later runs
-        Subs->>DB: update status to past_due, then suspended
-        Subs->>DB: insert past_due and suspended events
+        Cron->>Subs: process lifecycle stages on later runs
+        Subs->>DB: update status to past_due, then suspended, then expired
+        Subs->>DB: insert past_due, suspended, expired events
     end
 ```
 
 ## Gaps Worth Knowing
 
-- `SubscriptionEventTypeEnum.UPGRADED` exists but is not currently emitted; successful upgrades from `trialing` write `payment_succeeded`, and from `active` or `past_due` write `renewed` (`src/common/enums/subscription-event-type.enum.ts`, `src/subscriptions/subscriptions.service.ts`).
-- `TRIAL_EXPIRED` and `EXPIRED` exist in enums, but no service emits or transitions to them (`src/common/enums/subscription-event-type.enum.ts`, `src/common/enums/subscription-status.enum.ts`).
+- `SubscriptionEventTypeEnum.UPGRADED` is now emitted when a successful payment activates a subscription that was previously `trialing` (`src/common/enums/subscription-event-type.enum.ts`, `src/subscriptions/subscriptions.service.ts`).
+- `TRIAL_EXPIRED` and `EXPIRED` are now implemented in lifecycle services and emitted as events (`src/common/enums/subscription-event-type.enum.ts`, `src/common/enums/subscription-status.enum.ts`, `src/subscriptions/subscriptions.service.ts`).
 - Webhook acknowledgment is asynchronous, so post-ack handler failures rely on logs rather than webhook retries.

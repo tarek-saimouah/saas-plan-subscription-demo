@@ -18,11 +18,15 @@ export class BillingCronService {
 
   @Cron(CronExpression.EVERY_HOUR)
   async processDueBilling(): Promise<void> {
-    // 1) apply scheduled downgrades first
-    await this.applyScheduledDowngrades();
+    try {
+      // 1) apply scheduled downgrades first
+      await this.applyScheduledDowngrades();
 
-    // 2) then process renewals using the updated active plan
-    await this.processDueRenewals();
+      // 2) then process renewals using the updated active plan
+      await this.processDueRenewals();
+    } catch (error) {
+      this.logger.error('process due billing cron failed', error);
+    }
   }
 
   private async applyScheduledDowngrades() {
@@ -146,7 +150,11 @@ export class BillingCronService {
     this.logger.info(`Cron ${new Date()} run: applySubscriptionLifecycleRules`);
 
     try {
-      await this.subscriptionsService.movePastDueExpiredSuspended();
+      await this.subscriptionsService.processTrialExpirations();
+      await this.subscriptionsService.movePastDueSubscriptions();
+      await this.subscriptionsService.moveSuspendedSubscriptions();
+      await this.subscriptionsService.moveExpiredSubscriptions();
+      await this.subscriptionsService.moveCancelledSubscriptions();
     } catch (error) {
       this.logger.error(
         'apply subscription lifecycle rules cron failed',

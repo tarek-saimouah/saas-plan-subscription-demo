@@ -16,5 +16,5 @@ export class GetEnterprisePlanRequestEventDto {
   @ApiPropertyOptional({ enum: EnterprisePlanRequestEventTypeEnum })
   @IsEnum(EnterprisePlanRequestEventTypeEnum)
   @IsOptional()
-  type?: string; // trial_started, trial_expired, payment_pending, payment_succeeded, payment_failed, renewed, upgraded, downgraded, downgrade_scheduled, cancelled, past_due, suspended, reactivated, manual_adjustment, enterprise_plan_created, enterprise_plan_updated
+  type?: string; // created, reviewed
 }
