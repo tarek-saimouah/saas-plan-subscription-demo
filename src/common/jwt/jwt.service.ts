@@ -10,52 +10,6 @@ export class JwtServiceUtils {
     private readonly configService: ConfigService,
   ) {}
 
-  async generateTokens(payload: {
-    userId: string;
-    tenantId?: string;
-    email?: string;
-    role?: string;
-    isExpires?: boolean;
-  }): Promise<{ accessToken: string; refreshToken: string }> {
-    const { userId, role, email, tenantId, isExpires = true } = payload;
-
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        {
-          sub: userId,
-          ...(role && { role }),
-          ...(tenantId && { tenantId }),
-          ...(email && { email }),
-        },
-        {
-          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-          ...(isExpires && {
-            expiresIn: this.configService.get<string>(
-              'JWT_ACCESS_EXPIRE',
-            ) as any,
-          }),
-        },
-      ),
-      this.jwtService.signAsync(
-        {
-          sub: userId,
-          email,
-        },
-        {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-          expiresIn: this.configService.get<string>(
-            'JWT_REFRESH_EXPIRE',
-          ) as any,
-        },
-      ),
-    ]);
-
-    return {
-      accessToken,
-      refreshToken,
-    };
-  }
-
   async generateAccessToken(payload: {
     userId: string;
     tenantId?: string;

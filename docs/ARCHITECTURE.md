@@ -203,6 +203,4 @@ flowchart LR
 ## Architectural Notes and Current Constraints
 
 - API versioning is URI-based and defaults to `/v1`, but the Tap webhook route is explicitly version-neutral (`src/main.ts`, `src/billing/webhook/billing-webhook.controller.ts`).
-- JWT access tokens exist, but refresh-token config is partially implemented only in `JwtServiceUtils.generateTokens()` and is not used by any controller; `.env.example` does not define `JWT_REFRESH_SECRET` or `JWT_REFRESH_EXPIRE` (`src/common/jwt/jwt.service.ts`, `.env.example`).
 - There is no Redis, queue, outbox, rate-limiter, or CSRF middleware in the current codebase.
-- There is no `docker-compose.yml` or container orchestration file in the repository root at the time of writing.

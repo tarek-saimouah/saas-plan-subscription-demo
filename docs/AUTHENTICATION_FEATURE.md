@@ -193,7 +193,6 @@ Examples:
 
 - access tokens are stateless JWTs; there is no server-side session store
 - no cookie session is configured
-- refresh-token generation exists in helper code only and is unused by controllers (`src/common/jwt/jwt.service.ts`)
 
 ### CORS and CSRF
 

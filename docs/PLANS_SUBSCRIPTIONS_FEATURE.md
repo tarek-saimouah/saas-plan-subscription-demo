@@ -505,6 +505,4 @@ sequenceDiagram
 
 ## Gaps Worth Knowing
 
-- `SubscriptionEventTypeEnum.UPGRADED` is now emitted when a successful payment activates a subscription that was previously `trialing` (`src/common/enums/subscription-event-type.enum.ts`, `src/subscriptions/subscriptions.service.ts`).
-- `TRIAL_EXPIRED` and `EXPIRED` are now implemented in lifecycle services and emitted as events (`src/common/enums/subscription-event-type.enum.ts`, `src/common/enums/subscription-status.enum.ts`, `src/subscriptions/subscriptions.service.ts`).
 - Webhook acknowledgment is asynchronous, so post-ack handler failures rely on logs rather than webhook retries.
