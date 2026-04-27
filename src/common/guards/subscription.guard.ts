@@ -130,6 +130,13 @@ export class SubscriptionGuard implements CanActivate {
         usage,
         quotaKey,
       });
+
+      // Also Check limit on service-level
+      // Don't rely on guard middleware only
+      // That protects from:
+      //  - parallel requests
+      //  - background jobs
+      //  - internal service calls
     }
 
     return true;

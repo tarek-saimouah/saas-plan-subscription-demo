@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { QuotaKey } from 'src/subscriptions/usage-keys.types';
+import { QuotaKey } from 'src/subscriptions/resource-keys.types';
 
 export const QUOTA_KEY = 'quota_key';
 

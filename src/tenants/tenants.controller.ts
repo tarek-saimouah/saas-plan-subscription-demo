@@ -39,6 +39,8 @@ import {
   SubscriptionGuard,
 } from '../common';
 import {
+  CanUseResourceDto,
+  CanUseResourceResponseDto,
   SubscriptionUsageResponseDto,
   TenantResponseDto,
   UpdateTenantDto,
@@ -270,7 +272,34 @@ export class TenantsController {
 
   @ApiOperation({
     summary: 'Roles: (user)',
-    description: 'use subscription quota (max projects)',
+    description: 'check if can use subscription resource by client',
+  })
+  @ApiDataResponse(CanUseResourceResponseDto)
+  @ApiNotFoundResponse({ type: ErrorResponseDto })
+  // permissions
+  @UseGuards(SubscriptionGuard)
+  @RequireSubscription({
+    allowTrial: true,
+    allowActive: true,
+    allowPastDue: false,
+    allowSuspended: false,
+  })
+  @Roles(['user'])
+  @Get('resources/can-use')
+  async canTenantUseResource(
+    @DecodedUser() decodedUser: JwtDecodedEntity,
+    @Query() getArgs: CanUseResourceDto,
+  ): Promise<DataResponse<CanUseResourceResponseDto>> {
+    const result = await this.tenantProfilesService.canTenantUseResource({
+      tenantId: decodedUser.tenantId!,
+      resourceKey: getArgs.resource as any,
+    });
+    return new DataResponse(result);
+  }
+
+  @ApiOperation({
+    summary: 'Roles: (user)',
+    description: 'use subscription resource (max projects)',
   })
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedDataResponse(SubscriptionUsageResponseDto)
@@ -285,20 +314,21 @@ export class TenantsController {
   })
   @RequireQuota('maxProjects')
   @Roles(['user'])
-  @Post('usage/use-projects')
+  @Post('resources/use-projects')
   async useProjectsQuota(
     @DecodedUser() decodedUser: JwtDecodedEntity,
   ): Promise<DataResponse<SubscriptionUsageResponseDto>> {
-    const result = await this.tenantProfilesService.tenantSubscriptionUse({
-      tenantId: decodedUser.tenantId!,
-      usageQuotaKey: 'projectsCount',
-    });
+    const result =
+      await this.tenantProfilesService.tenantSubscriptionResourceUse({
+        tenantId: decodedUser.tenantId!,
+        resourceKey: 'projectsCount',
+      });
     return new DataResponse(result);
   }
 
   @ApiOperation({
     summary: 'Roles: (user)',
-    description: 'use subscription quota (max users)',
+    description: 'use subscription resource (max users)',
   })
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedDataResponse(SubscriptionUsageResponseDto)
@@ -313,20 +343,21 @@ export class TenantsController {
   @RequireQuota('maxUsers')
   // permissions
   @Roles(['user'])
-  @Post('usage/use-users')
+  @Post('resources/use-users')
   async useUsersQuota(
     @DecodedUser() decodedUser: JwtDecodedEntity,
   ): Promise<DataResponse<SubscriptionUsageResponseDto>> {
-    const result = await this.tenantProfilesService.tenantSubscriptionUse({
-      tenantId: decodedUser.tenantId!,
-      usageQuotaKey: 'usersCount',
-    });
+    const result =
+      await this.tenantProfilesService.tenantSubscriptionResourceUse({
+        tenantId: decodedUser.tenantId!,
+        resourceKey: 'usersCount',
+      });
     return new DataResponse(result);
   }
 
   @ApiOperation({
     summary: 'Roles: (user)',
-    description: 'use subscription quota (max sessions)',
+    description: 'use subscription resource (max sessions)',
   })
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedDataResponse(SubscriptionUsageResponseDto)
@@ -341,20 +372,21 @@ export class TenantsController {
   @RequireQuota('maxSessions')
   // permissions
   @Roles(['user'])
-  @Post('usage/use-sessions')
+  @Post('resources/use-sessions')
   async useSessionsQuota(
     @DecodedUser() decodedUser: JwtDecodedEntity,
   ): Promise<DataResponse<SubscriptionUsageResponseDto>> {
-    const result = await this.tenantProfilesService.tenantSubscriptionUse({
-      tenantId: decodedUser.tenantId!,
-      usageQuotaKey: 'sessionsCount',
-    });
+    const result =
+      await this.tenantProfilesService.tenantSubscriptionResourceUse({
+        tenantId: decodedUser.tenantId!,
+        resourceKey: 'sessionsCount',
+      });
     return new DataResponse(result);
   }
 
   @ApiOperation({
     summary: 'Roles: (user)',
-    description: 'use subscription quota (max requests)',
+    description: 'use subscription resource (max requests)',
   })
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedDataResponse(SubscriptionUsageResponseDto)
@@ -369,14 +401,15 @@ export class TenantsController {
   })
   @RequireQuota('maxRequests')
   @Roles(['user'])
-  @Post('usage/use-requests')
+  @Post('resources/use-requests')
   async useRequestsQuota(
     @DecodedUser() decodedUser: JwtDecodedEntity,
   ): Promise<DataResponse<SubscriptionUsageResponseDto>> {
-    const result = await this.tenantProfilesService.tenantSubscriptionUse({
-      tenantId: decodedUser.tenantId!,
-      usageQuotaKey: 'requestsCount',
-    });
+    const result =
+      await this.tenantProfilesService.tenantSubscriptionResourceUse({
+        tenantId: decodedUser.tenantId!,
+        resourceKey: 'requestsCount',
+      });
     return new DataResponse(result);
   }
 }

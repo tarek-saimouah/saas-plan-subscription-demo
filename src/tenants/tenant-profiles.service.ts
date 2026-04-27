@@ -7,6 +7,7 @@ import {
 import { TenantMapper } from './mappers';
 import { PrismaService } from 'src/database';
 import {
+  CanUseResourceResponseDto,
   SubscriptionUsageResponseDto,
   TenantResponseDto,
   UpdateTenantDto,
@@ -14,7 +15,7 @@ import {
 import { MessageResponseDto, SuccessResponseDto } from 'src/common';
 import {
   SubscriptionUsageLimitsService,
-  UsageQuotakey,
+  SubscriptionResourcekey,
 } from 'src/subscriptions';
 
 @Injectable()
@@ -85,10 +86,40 @@ export class TenantProfilesService {
     return new SuccessResponseDto('Enterprise plan is active');
   }
 
-  // increment usage
-  async tenantSubscriptionUse(params: {
+  // check resource endpoint for client
+  async canTenantUseResource(params: {
     tenantId: string;
-    usageQuotaKey: UsageQuotakey;
+    resourceKey: SubscriptionResourcekey;
+  }): Promise<CanUseResourceResponseDto> {
+    const subscription = await this.prisma.tenantSubscription.findUnique({
+      where: { tenantId: params.tenantId },
+      select: { plan: true, tenant: { select: { usage: true } } },
+    });
+
+    if (!subscription || !subscription.tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
+    const usage = subscription.tenant.usage;
+    if (!usage) {
+      throw new ForbiddenException('Usage record is missing');
+    }
+
+    const canUseResource = this.usageLimitsService.canUseResource({
+      plan: subscription.plan,
+      usage,
+      resourceKey: params.resourceKey,
+    });
+
+    return {
+      canUseResource,
+    };
+  }
+
+  // increment usage
+  async tenantSubscriptionResourceUse(params: {
+    tenantId: string;
+    resourceKey: SubscriptionResourcekey;
   }): Promise<SubscriptionUsageResponseDto> {
     const subscription = await this.prisma.tenantSubscription.findUnique({
       where: { tenantId: params.tenantId },
@@ -114,14 +145,14 @@ export class TenantProfilesService {
     this.usageLimitsService.isLimitExceeded({
       plan: subscription.plan,
       usage,
-      usageKey: params.usageQuotaKey,
+      resourceKey: params.resourceKey,
     });
 
     // increment projects
     const updatedUsage = await this.prisma.tenantUsage.update({
       where: { tenantId: params.tenantId },
       data: {
-        [params.usageQuotaKey]: { increment: 1 },
+        [params.resourceKey]: { increment: 1 },
       },
     });
 

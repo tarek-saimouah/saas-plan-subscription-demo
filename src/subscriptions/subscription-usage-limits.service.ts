@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Plan, TenantUsage } from 'src/generated/prisma/client';
-import { QuotaKey, UsageQuotakey } from './usage-keys.types';
+import { QuotaKey, SubscriptionResourcekey } from './resource-keys.types';
 
 @Injectable()
 export class SubscriptionUsageLimitsService {
@@ -12,90 +12,164 @@ export class SubscriptionUsageLimitsService {
           plan: Plan;
           usage: TenantUsage;
           quotaKey: QuotaKey; // required
-          usageKey?: UsageQuotakey; // optional
+          resourceKey?: SubscriptionResourcekey; // optional
         }
       | {
           plan: Plan;
           usage: TenantUsage;
           quotaKey?: QuotaKey; // optional
-          usageKey: UsageQuotakey; // required
+          resourceKey: SubscriptionResourcekey; // required
         },
   ) {
     // add limit check implementation for each key
 
     if (
       params.quotaKey === 'maxProjects' ||
-      params.usageKey === 'projectsCount'
+      params.resourceKey === 'projectsCount'
     ) {
-      return this.checkProjectsLimit({
+      const isLimitExceeded = this.projectsLimitExceeded({
         plan: params.plan,
         usage: params.usage,
       });
+
+      if (isLimitExceeded) {
+        throw new ForbiddenException('Quota exceeded: (max projects)');
+      }
     }
 
-    if (params.quotaKey === 'maxUsers' || params.usageKey === 'usersCount') {
-      return this.checkUsersLimit({
+    if (params.quotaKey === 'maxUsers' || params.resourceKey === 'usersCount') {
+      const isLimitExceeded = this.usersLimitExceeded({
         plan: params.plan,
         usage: params.usage,
       });
+
+      if (isLimitExceeded) {
+        throw new ForbiddenException('Quota exceeded: (max users)');
+      }
     }
 
     if (
       params.quotaKey === 'maxSessions' ||
-      params.usageKey === 'sessionsCount'
+      params.resourceKey === 'sessionsCount'
     ) {
-      return this.checkSessionsLimit({
+      const isLimitExceeded = this.sessionsLimitExceeded({
         plan: params.plan,
         usage: params.usage,
       });
+
+      if (isLimitExceeded) {
+        throw new ForbiddenException('Quota exceeded: (max sessions)');
+      }
     }
 
     if (
       params.quotaKey === 'maxRequests' ||
-      params.usageKey === 'requestsCount'
+      params.resourceKey === 'requestsCount'
     ) {
-      return this.checkRequestsLimit({
+      const isLimitExceeded = this.requestsLimitExceeded({
+        plan: params.plan,
+        usage: params.usage,
+      });
+
+      if (isLimitExceeded) {
+        throw new ForbiddenException('Quota exceeded: (max requests)');
+      }
+    }
+  }
+
+  canUseResource(params: {
+    plan: Plan;
+    usage: TenantUsage;
+    resourceKey: SubscriptionResourcekey; // optional
+  }): boolean {
+    // add limit check implementation for each key
+
+    if (params.resourceKey === 'projectsCount') {
+      return !this.projectsLimitExceeded({
         plan: params.plan,
         usage: params.usage,
       });
     }
+
+    if (params.resourceKey === 'usersCount') {
+      return !this.usersLimitExceeded({
+        plan: params.plan,
+        usage: params.usage,
+      });
+    }
+
+    if (params.resourceKey === 'sessionsCount') {
+      return !this.sessionsLimitExceeded({
+        plan: params.plan,
+        usage: params.usage,
+      });
+    }
+
+    if (params.resourceKey === 'requestsCount') {
+      return !this.requestsLimitExceeded({
+        plan: params.plan,
+        usage: params.usage,
+      });
+    }
+
+    return true;
   }
 
   // limits check implementations
 
-  private checkProjectsLimit(params: { plan: Plan; usage: TenantUsage }) {
+  private projectsLimitExceeded(params: {
+    plan: Plan;
+    usage: TenantUsage;
+  }): boolean {
     const limit = params.plan.maxProjects;
     const current = params.usage.projectsCount;
 
     if (limit !== null && limit !== undefined && current >= limit) {
-      throw new ForbiddenException('Quota exceeded: (max projects)');
+      return true;
     }
+
+    return false;
   }
 
-  private checkUsersLimit(params: { plan: Plan; usage: TenantUsage }) {
+  private usersLimitExceeded(params: {
+    plan: Plan;
+    usage: TenantUsage;
+  }): boolean {
     const limit = params.plan.maxUsers;
     const current = params.usage.usersCount;
 
     if (limit !== null && limit !== undefined && current >= limit) {
-      throw new ForbiddenException('Quota exceeded: (max users)');
+      return true;
     }
+
+    return false;
   }
 
-  private checkSessionsLimit(params: { plan: Plan; usage: TenantUsage }) {
+  private sessionsLimitExceeded(params: {
+    plan: Plan;
+    usage: TenantUsage;
+  }): boolean {
     const limit = params.plan.maxSessions;
     const current = params.usage.sessionsCount;
 
     if (limit !== null && limit !== undefined && current >= limit) {
-      throw new ForbiddenException('Quota exceeded: (max sessions)');
+      return true;
     }
+
+    return false;
   }
 
-  private checkRequestsLimit(params: { plan: Plan; usage: TenantUsage }) {
+  private requestsLimitExceeded(params: {
+    plan: Plan;
+    usage: TenantUsage;
+  }): boolean {
     const limit = params.plan.maxRequests;
     const current = params.usage.requestsCount;
 
     if (limit !== null && limit !== undefined && current >= limit) {
-      throw new ForbiddenException('Quota exceeded: (max requests)');
+      return true;
     }
+
+    return false;
   }
 }
