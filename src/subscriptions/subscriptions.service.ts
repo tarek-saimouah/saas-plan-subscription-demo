@@ -339,39 +339,37 @@ export class SubscriptionsService {
         billingCycle: subscription.billingCycle as BillingCycleEnum,
       });
 
-      await this.prisma.$transaction(async (tx) => {
-        const updated = await tx.tenantSubscription.update({
-          where: { subscriptionId: subscription.subscriptionId },
-          data: {
-            planId: newPlan.planId,
-            pendingPlanId: null,
-            pendingPlanEffectiveAt: null,
-            priceSnapshot: newPrice,
-            quotaSnapshot: {
-              maxProjects: newPlan.maxProjects,
-              maxUsers: newPlan.maxUsers,
-              maxSessions: newPlan.maxSessions,
-              maxRequests: newPlan.maxRequests,
-            },
+      const updated = await tx.tenantSubscription.update({
+        where: { subscriptionId: subscription.subscriptionId },
+        data: {
+          planId: newPlan.planId,
+          pendingPlanId: null,
+          pendingPlanEffectiveAt: null,
+          priceSnapshot: newPrice,
+          quotaSnapshot: {
+            maxProjects: newPlan.maxProjects,
+            maxUsers: newPlan.maxUsers,
+            maxSessions: newPlan.maxSessions,
+            maxRequests: newPlan.maxRequests,
           },
-        });
-
-        await tx.subscriptionEvent.create({
-          data: {
-            subscriptionId: subscription.subscriptionId,
-            type: SubscriptionEventTypeEnum.DOWNGRADED,
-            fromPlanId: subscription.planId,
-            toPlanId: newPlan.planId,
-            meta: {
-              appliedAt: new Date(),
-            },
-          },
-        });
-
-        this.logger.info(
-          `Downgrade applied for subscription ${updated.subscriptionId} to plan ${newPlan.planId}`,
-        );
+        },
       });
+
+      await tx.subscriptionEvent.create({
+        data: {
+          subscriptionId: subscription.subscriptionId,
+          type: SubscriptionEventTypeEnum.DOWNGRADED,
+          fromPlanId: subscription.planId,
+          toPlanId: newPlan.planId,
+          meta: {
+            appliedAt: new Date(),
+          },
+        },
+      });
+
+      this.logger.info(
+        `Downgrade applied for subscription ${updated.subscriptionId} to plan ${newPlan.planId}`,
+      );
     });
   }
 

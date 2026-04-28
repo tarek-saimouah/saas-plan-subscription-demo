@@ -17,6 +17,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "pretest:integration": "test -f .env.test || { echo '.env.test not found'; exit 1; }; dotenv -e .env.test -- pnpm prisma db push",
+    "test:integration": "test -f .env.test || { echo '.env.test not found'; exit 1; }; dotenv -e .env.test -- jest --config ./test/jest-integration.json",
     "pretest:e2e": "test -f .env.test || { echo '.env.test not found'; exit 1; }; dotenv -e .env.test -- pnpm prisma db push",
     "test:e2e": "test -f .env.test || { echo '.env.test not found'; exit 1; }; dotenv -e .env.test -- jest --config ./test/jest-e2e.json"
   },
