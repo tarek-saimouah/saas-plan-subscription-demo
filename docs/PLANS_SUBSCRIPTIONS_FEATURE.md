@@ -20,7 +20,7 @@ Primary implementation files:
 
 Stored in `plans` with:
 
-- identity and display: `plan_id`, `name`, `description`, `sortOrder`, `is_active` (`prisma/migrations/20260425165036_init/migration.sql`)
+- identity and display: `plan_id`, `name`, `description`, `sort_order`, `is_active` (`prisma/migrations`)
 - commercial terms: `kind`, `monthly_price`, `yearly_price`, `currency` (`prisma/schema/plans.prisma`)
 - tenancy binding: optional `tenant_id` for `enterprise_custom` plans only (`prisma/schema/plans.prisma`)
 - quotas: `max_projects`, `max_users`, `max_sessions`, `max_requests` (`prisma/schema/plans.prisma`)
@@ -40,7 +40,7 @@ Each tenant has at most one subscription (`tenant_id` unique). The row stores:
 
 ### `subscription_payments`
 
-The payment ledger is append-only and de-duplicates by `provider_event_id` and `provider_payment_ref` unique indexes (`prisma/schema/payments.prisma`, `prisma/migrations/20260425165036_init/migration.sql`).
+The payment ledger is append-only and de-duplicates by `provider_event_id` and `provider_payment_ref` unique indexes (`prisma/schema/payments.prisma`, `prisma/migrations`).
 
 ### `subscription_events`
 
@@ -331,7 +331,7 @@ Webhook idempotency is implemented in the subscription service, not the controll
 
 - successful events exit early if a payment already exists for `providerEventId` (`src/subscriptions/subscriptions.service.ts`)
 - failed events also exit early on duplicate `providerEventId` (`src/subscriptions/subscriptions.service.ts`)
-- the database additionally enforces unique `provider_event_id` and `provider_payment_ref` (`prisma/migrations/20260425165036_init/migration.sql`)
+- the database additionally enforces unique `provider_event_id` and `provider_payment_ref` (`prisma/migrations`)
 
 ### Error and retry behavior
 

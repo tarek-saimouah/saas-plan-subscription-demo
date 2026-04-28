@@ -21,8 +21,8 @@ CREATE TABLE "enterprise_plan_request_events" (
     "event_id" UUID NOT NULL,
     "request_id" UUID NOT NULL,
     "type" TEXT NOT NULL,
-    "fromPlanId" UUID,
-    "toPlanId" UUID,
+    "from_plan_id" UUID,
+    "to_plan_id" UUID,
     "actor_user_id" UUID,
     "meta" JSONB,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -56,7 +56,7 @@ CREATE TABLE "plans" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
-    "sortOrder" INTEGER NOT NULL DEFAULT 0,
+    "sort_order" INTEGER NOT NULL DEFAULT 0,
     "kind" TEXT NOT NULL DEFAULT 'standard',
     "monthly_price" DECIMAL(10,2) NOT NULL,
     "yearly_price" DECIMAL(10,2) NOT NULL,
@@ -92,14 +92,14 @@ CREATE TABLE "tenant_subscriptions" (
     "pending_plan_effective_at" TIMESTAMPTZ(6),
     "price_snapshot" DECIMAL(10,2),
     "quota_snapshot" JSONB,
-    "paymentProvider" TEXT NOT NULL DEFAULT 'tap',
+    "payment_provider" TEXT NOT NULL DEFAULT 'tap',
     "tap_customer_id" TEXT,
     "tap_card_id" TEXT,
     "tap_payment_agreement_id" TEXT,
     "latest_payment_id" UUID,
     "billing_cycle" TEXT NOT NULL DEFAULT 'monthly',
-    "nextBillingAt" TIMESTAMPTZ(6),
-    "lastBillingAt" TIMESTAMPTZ(6),
+    "next_billing_at" TIMESTAMPTZ(6),
+    "last_billing_at" TIMESTAMPTZ(6),
     "retry_count" SMALLINT NOT NULL DEFAULT 0,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -125,8 +125,8 @@ CREATE TABLE "subscription_events" (
     "event_id" UUID NOT NULL,
     "subscription_id" UUID NOT NULL,
     "type" TEXT NOT NULL,
-    "fromPlanId" UUID,
-    "toPlanId" UUID,
+    "from_plan_id" UUID,
+    "to_plan_id" UUID,
     "actor_user_id" UUID,
     "meta" JSONB,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -180,7 +180,7 @@ CREATE INDEX "plans_kind_tenant_id_idx" ON "plans"("kind", "tenant_id");
 CREATE UNIQUE INDEX "tenant_subscriptions_tenant_id_key" ON "tenant_subscriptions"("tenant_id");
 
 -- CreateIndex
-CREATE INDEX "tenant_subscriptions_status_nextBillingAt_idx" ON "tenant_subscriptions"("status", "nextBillingAt");
+CREATE INDEX "tenant_subscriptions_status_next_billing_at_idx" ON "tenant_subscriptions"("status", "next_billing_at");
 
 -- CreateIndex
 CREATE INDEX "tenant_subscriptions_trial_ends_at_idx" ON "tenant_subscriptions"("trial_ends_at");
