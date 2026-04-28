@@ -67,13 +67,13 @@ export class TapPaymentGatewayService {
       return { response: result.data };
     } catch (error: any) {
       this.logger.error(
-        'An error happened while requesting tap payment payment (createCardToken)',
+        'An error happened while requesting tap payment (createCardToken)',
         error.response?.data,
       );
       return {
         error:
           error.response?.data ||
-          'An error happened while requesting tap payment payment (createCardToken)',
+          'An error happened while requesting tap payment (createCardToken)',
       };
     }
   }
@@ -133,13 +133,13 @@ export class TapPaymentGatewayService {
       return { response: result.data };
     } catch (error: any) {
       this.logger.error(
-        'An error happened while requesting tap payment payment (createCharge)',
+        'An error happened while requesting tap payment (createCharge)',
         error.response?.data,
       );
       return {
         error:
           error.response?.data ||
-          'An error happened while requesting tap payment payment (createCharge)',
+          'An error happened while requesting tap payment (createCharge)',
       };
     }
   }
@@ -203,13 +203,13 @@ export class TapPaymentGatewayService {
       return { response: result.data };
     } catch (error: any) {
       this.logger.error(
-        'An error happened while requesting tap payment payment (createRecurringCharge)',
+        'An error happened while requesting tap payment (createRecurringCharge)',
         error.response?.data,
       );
       return {
         error:
           error.response?.data ||
-          'An error happened while requesting tap payment payment (createRecurringCharge)',
+          'An error happened while requesting tap payment (createRecurringCharge)',
       };
     }
   }
@@ -275,13 +275,13 @@ export class TapPaymentGatewayService {
       return { response: result.data };
     } catch (error: any) {
       this.logger.error(
-        'An error happened while requesting tap payment payment (createInitialChargeWithSaveCard)',
+        'An error happened while requesting tap payment (createInitialChargeWithSaveCard)',
         error.response?.data,
       );
       return {
         error:
           error.response?.data ||
-          'An error happened while requesting tap payment payment (createInitialChargeWithSaveCard)',
+          'An error happened while requesting tap payment (createInitialChargeWithSaveCard)',
       };
     }
   }
@@ -309,13 +309,13 @@ export class TapPaymentGatewayService {
       return { response: result.data };
     } catch (error: any) {
       this.logger.error(
-        'An error happened while requesting tap payment payment (retrieveCharge)',
+        'An error happened while requesting tap payment (retrieveCharge)',
         error.response?.data,
       );
       return {
         error:
           error.response?.data ||
-          'An error happened while requesting tap payment payment (retrieveCharge)',
+          'An error happened while requesting tap payment (retrieveCharge)',
       };
     }
   }
