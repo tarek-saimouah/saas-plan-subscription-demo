@@ -789,12 +789,12 @@ export class SubscriptionsService {
     const now = new Date();
     const expirationWindowMs = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-    // 7 days after failure -> SUSPENDED
+    // 7 days after failed renewal -> SUSPENDED
     const suspended = await this.prisma.tenantSubscription.updateManyAndReturn({
       where: {
         status: SubscriptionStatusEnum.PAST_DUE,
-        pastDueAt: { not: null },
-        updatedAt: {
+        pastDueAt: {
+          not: null,
           lte: new Date(now.getTime() - expirationWindowMs),
         },
       },
