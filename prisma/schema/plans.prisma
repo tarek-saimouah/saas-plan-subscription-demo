@@ -3,7 +3,7 @@ model Plan {
   name        String  @unique
   description String?
   isActive    Boolean @default(true) @map("is_active")
-  sortOrder   Int     @default(0)
+  sortOrder   Int     @default(0) @map("sort_order")
 
   kind         String  @default("standard") // standard, enterprise_custom
   // For 'standard' plans this is the public price.

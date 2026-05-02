@@ -10,7 +10,7 @@ Core runtime and infrastructure files:
 - `.env.example`: required env keys for HTTP, JWT, hashing, Swagger, and Tap.
 - `prisma.config.ts`: Prisma schema directory, migrations path, and seed command.
 - `prisma/schema/schema.prisma`: Prisma generator and PostgreSQL datasource.
-- `prisma/migrations/20260425165036_init/migration.sql`: concrete tables, indexes, and foreign keys.
+- `prisma/migrations`: concrete tables, indexes, and foreign keys.
 - `nest-cli.json`, `tsconfig.json`, `tsconfig.build.json`, `eslint.config.mjs`: build and lint configuration.
 
 ## Technology Stack

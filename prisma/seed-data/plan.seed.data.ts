@@ -15,7 +15,7 @@ export const PlansSeedData: Prisma.PlanCreateInput[] = [
     maxProjects: 2,
     maxUsers: 2,
     maxSessions: 2,
-    maxRequests: 2,
+    maxRequests: 100,
   },
   // Basic plan
   {
@@ -29,7 +29,7 @@ export const PlansSeedData: Prisma.PlanCreateInput[] = [
     maxProjects: 10,
     maxUsers: 10,
     maxSessions: 10,
-    maxRequests: 10,
+    maxRequests: 500,
   },
   // Pro plan
   {
@@ -43,6 +43,6 @@ export const PlansSeedData: Prisma.PlanCreateInput[] = [
     maxProjects: 40,
     maxUsers: 40,
     maxSessions: 40,
-    maxRequests: 40,
+    maxRequests: 2000,
   },
 ];

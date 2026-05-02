@@ -30,8 +30,8 @@ model EnterprisePlanRequestEvent {
   requestId String @map("request_id") @db.Uuid
 
   type       String // created, reviewed
-  fromPlanId String? @map("fromPlanId") @db.Uuid
-  toPlanId   String? @map("toPlanId") @db.Uuid
+  fromPlanId String? @map("from_plan_id") @db.Uuid
+  toPlanId   String? @map("to_plan_id") @db.Uuid
 
   actorUserId String? @map("actor_user_id") @db.Uuid
   meta        Json?   @db.JsonB

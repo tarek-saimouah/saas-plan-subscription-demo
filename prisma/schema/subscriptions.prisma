@@ -25,7 +25,7 @@ model TenantSubscription {
   quotaSnapshot Json?    @map("quota_snapshot") @db.JsonB
 
   // Tap recurring data
-  paymentProvider       String  @default("tap") // e.g. "tap"
+  paymentProvider       String  @default("tap") @map("payment_provider") // e.g. "tap"
   tapCustomerId         String? @map("tap_customer_id")
   tapCardId             String? @map("tap_card_id")
   tapPaymentAgreementId String? @map("tap_payment_agreement_id")
@@ -35,8 +35,8 @@ model TenantSubscription {
 
   // recurring billing
   billingCycle  String    @default("monthly") @map("billing_cycle") // monthly, yearly
-  nextBillingAt DateTime? @map("nextBillingAt") @db.Timestamptz(6)
-  lastBillingAt DateTime? @map("lastBillingAt") @db.Timestamptz(6)
+  nextBillingAt DateTime? @map("next_billing_at") @db.Timestamptz(6)
+  lastBillingAt DateTime? @map("last_billing_at") @db.Timestamptz(6)
   retryCount    Int       @default(0) @map("retry_count") @db.SmallInt
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -79,8 +79,8 @@ model SubscriptionEvent {
   subscriptionId String @map("subscription_id") @db.Uuid
 
   type       String // trial_started, trial_expired, expired, payment_pending, payment_succeeded, payment_failed, renewed, upgraded, downgraded, downgrade_scheduled, cancelled, past_due, suspended, reactivated, manual_adjustment, enterprise_plan_created, enterprise_plan_updated
-  fromPlanId String? @map("fromPlanId") @db.Uuid
-  toPlanId   String? @map("toPlanId") @db.Uuid
+  fromPlanId String? @map("from_plan_id") @db.Uuid
+  toPlanId   String? @map("to_plan_id") @db.Uuid
 
   actorUserId String? @map("actor_user_id") @db.Uuid
   meta        Json?   @db.JsonB

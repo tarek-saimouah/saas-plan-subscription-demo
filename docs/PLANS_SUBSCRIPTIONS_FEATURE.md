@@ -20,7 +20,7 @@ Primary implementation files:
 
 Stored in `plans` with:
 
-- identity and display: `plan_id`, `name`, `description`, `sortOrder`, `is_active` (`prisma/migrations/20260425165036_init/migration.sql`)
+- identity and display: `plan_id`, `name`, `description`, `sort_order`, `is_active` (`prisma/migrations`)
 - commercial terms: `kind`, `monthly_price`, `yearly_price`, `currency` (`prisma/schema/plans.prisma`)
 - tenancy binding: optional `tenant_id` for `enterprise_custom` plans only (`prisma/schema/plans.prisma`)
 - quotas: `max_projects`, `max_users`, `max_sessions`, `max_requests` (`prisma/schema/plans.prisma`)
@@ -40,7 +40,7 @@ Each tenant has at most one subscription (`tenant_id` unique). The row stores:
 
 ### `subscription_payments`
 
-The payment ledger is append-only and de-duplicates by `provider_event_id` and `provider_payment_ref` unique indexes (`prisma/schema/payments.prisma`, `prisma/migrations/20260425165036_init/migration.sql`).
+The payment ledger is append-only and de-duplicates by `provider_event_id` and `provider_payment_ref` unique indexes (`prisma/schema/payments.prisma`, `prisma/migrations`).
 
 ### `subscription_events`
 
@@ -108,7 +108,7 @@ Paid standard subscriptions reuse the same `tenant_subscriptions` row. The tenan
 - Recurring billing cron excludes `cancelAtPeriodEnd = true`, so pending cancellations do not renew again (`src/billing/billing-cron.service.ts`).
 - Lifecycle cron later finalizes those rows into `status = cancelled`, sets `cancelledAt`, clears `nextBillingAt`, and writes a second cancellation event tagged with `finalizedByCron` (`src/subscriptions/subscriptions.service.ts`).
 - `SubscriptionGuard` blocks both `cancelled` and `expired` subscriptions on protected routes (`src/common/guards/subscription.guard.ts`).
-- `expired` is now a real terminal state: suspended subscriptions older than 60 days are moved to `expired` and emit an `expired` event (`src/subscriptions/subscriptions.service.ts`).
+- `expired` is a terminal state: suspended subscriptions older than 60 days are moved to `expired` and emit an `expired` event (`src/subscriptions/subscriptions.service.ts`).
 
 ## Subscription State Machine
 
@@ -130,7 +130,7 @@ Paid standard subscriptions reuse the same `tenant_subscriptions` row. The tenan
 - `active|past_due -> active|past_due + cancelAtPeriodEnd`: user cancellation request schedules end-of-period cancellation (`src/subscriptions/subscriptions.service.ts`)
 - `active -> active + pastDueAt + retryCount++`: failed charge records failure but keeps status `active` initially (`src/subscriptions/subscriptions.service.ts`)
 - `active with stale pastDueAt -> past_due`: lifecycle cron after 3 days (`src/subscriptions/subscriptions.service.ts`)
-- `past_due -> suspended`: lifecycle cron after 7 days in `past_due`, based on `updatedAt` (`src/subscriptions/subscriptions.service.ts`)
+- `past_due -> suspended`: lifecycle cron after 7 days of failed renewal, based on `pastDueAt` (`src/subscriptions/subscriptions.service.ts`)
 - `suspended -> expired`: lifecycle cron after 60 days from `suspendedAt` (`src/subscriptions/subscriptions.service.ts`)
 - `active|past_due with cancelAtPeriodEnd and due period end -> cancelled`: lifecycle cron finalization (`src/subscriptions/subscriptions.service.ts`)
 - `suspended -> active`: successful resubscribe payment (`src/subscriptions/subscriptions.service.ts`)
@@ -173,7 +173,7 @@ Paid standard subscriptions reuse the same `tenant_subscriptions` row. The tenan
 ### 5. Failed renewal and grace handling
 
 - Webhook failure creates a failed payment row keyed by `providerEventId`, increments `retryCount`, sets `pastDueAt`, and writes `payment_failed` (`src/subscriptions/subscriptions.service.ts`)
-- A separate 30-minute cron emits `trial_expired`, marks still-unresolved subscriptions `past_due` after 3 days, `suspended` after 7 days in `past_due`, and `expired` after 60 days in `suspended` (`src/subscriptions/subscriptions.service.ts`, `src/billing/billing-cron.service.ts`)
+- A separate 30-minute cron emits `trial_expired`, marks still-unresolved subscriptions `past_due` after 3 days, `suspended` after 7 days, and `expired` after 60 days in `suspended` (`src/subscriptions/subscriptions.service.ts`, `src/billing/billing-cron.service.ts`)
 
 ### 6. Resubscribe suspended plan
 
@@ -331,7 +331,7 @@ Webhook idempotency is implemented in the subscription service, not the controll
 
 - successful events exit early if a payment already exists for `providerEventId` (`src/subscriptions/subscriptions.service.ts`)
 - failed events also exit early on duplicate `providerEventId` (`src/subscriptions/subscriptions.service.ts`)
-- the database additionally enforces unique `provider_event_id` and `provider_payment_ref` (`prisma/migrations/20260425165036_init/migration.sql`)
+- the database additionally enforces unique `provider_event_id` and `provider_payment_ref` (`prisma/migrations`)
 
 ### Error and retry behavior
 
@@ -444,8 +444,8 @@ For each row:
 Implemented timeline:
 
 - when `trialing` and `trialEndsAt <= now`: emit `trial_expired` once, without changing subscription status (`src/subscriptions/subscriptions.service.ts`)
-- after 3 days: `active` with `pastDueAt != null` becomes `past_due` (`src/subscriptions/subscriptions.service.ts`)
-- after 7 days in `past_due`, based on `updatedAt`: it becomes `suspended` and sets `suspendedAt = now` (`src/subscriptions/subscriptions.service.ts`)
+- after 3 days of failed renewal: `active` with `pastDueAt != null` becomes `past_due` (`src/subscriptions/subscriptions.service.ts`)
+- after 7 days of failed renewal, `past_due` with `pastDueAt != null` based on `pastDueAt`: it becomes `suspended` and sets `suspendedAt = now` (`src/subscriptions/subscriptions.service.ts`)
 - after 60 days in `suspended`, based on `suspendedAt`: it becomes `expired` and clears `nextBillingAt` (`src/subscriptions/subscriptions.service.ts`)
 - when `cancelAtPeriodEnd = true` and `currentPeriodEnd <= now`: `active` or `past_due` becomes `cancelled`, `cancelledAt` is set, and `nextBillingAt` is cleared (`src/subscriptions/subscriptions.service.ts`)
 
