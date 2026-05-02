@@ -30,40 +30,40 @@ describe('SubscriptionsService', () => {
     runTransaction();
   });
 
-  // it('startTrialForNewUser() creates a trial subscription and event', async () => {
-  //   prisma.tenant.findUnique.mockResolvedValue({
-  //     tenantId: 'tenant-1',
-  //     ownerId: 'user-1',
-  //     subscription: null,
-  //   } as any);
-  //   prisma.plan.findFirst.mockResolvedValue({
-  //     planId: 'plan-free',
-  //     trialDays: 14,
-  //     monthlyPrice: decimal(0),
-  //     maxProjects: 2,
-  //     maxUsers: 2,
-  //     maxSessions: 2,
-  //     maxRequests: 2,
-  //   } as any);
-  //   prisma.tenantSubscription.create.mockImplementation(
-  //     async ({ data }: any) => ({
-  //       subscriptionId: 'sub-1',
-  //       ...data,
-  //     }),
-  //   );
+  it('startTrialForNewUser() creates a trial subscription and event', async () => {
+    prisma.tenant.findUnique.mockResolvedValue({
+      tenantId: 'tenant-1',
+      ownerId: 'user-1',
+      subscription: null,
+    } as any);
+    prisma.plan.findFirst.mockResolvedValue({
+      planId: 'plan-free',
+      trialDays: 14,
+      monthlyPrice: decimal(0),
+      maxProjects: 2,
+      maxUsers: 2,
+      maxSessions: 2,
+      maxRequests: 2,
+    } as any);
+    (prisma.tenantSubscription.create as any).mockImplementation(
+      async ({ data }: any) => ({
+        subscriptionId: 'sub-1',
+        ...data,
+      }),
+    );
 
-  //   const result = await service.startTrialForNewUser('user-1', 'tenant-1');
+    const result = await service.startTrialForNewUser('user-1', 'tenant-1');
 
-  //   expect(result.subscription.status).toBe(SubscriptionStatusEnum.TRIALING);
-  //   expect(result.subscription.priceSnapshot?.toString()).toBe('0');
-  //   expect(prisma.subscriptionEvent.create).toHaveBeenCalledWith({
-  //     data: expect.objectContaining({
-  //       subscriptionId: 'sub-1',
-  //       type: SubscriptionEventTypeEnum.TRIAL_STARTED,
-  //       toPlanId: 'plan-free',
-  //     }),
-  //   });
-  // });
+    expect(result.subscription.status).toBe(SubscriptionStatusEnum.TRIALING);
+    expect(result.subscription.priceSnapshot?.toString()).toBe('0');
+    expect(prisma.subscriptionEvent.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        subscriptionId: 'sub-1',
+        type: SubscriptionEventTypeEnum.TRIAL_STARTED,
+        toPlanId: 'plan-free',
+      }),
+    });
+  });
 
   it('requestUpgradeToPaidPlan() throws when target plan does not exist', async () => {
     prisma.tenantSubscription.findUnique.mockResolvedValue({
@@ -200,6 +200,10 @@ describe('SubscriptionsService', () => {
   });
 
   it('activateAfterSuccessfulPayment() returns early on duplicate providerEventId', async () => {
+    // activateAfterSuccessfulPayment()
+    // Returns updated subscription for success
+    // Returns existing payment for duplicate event
+
     prisma.tenantSubscription.findUnique.mockResolvedValue({
       tenantId: 'tenant-1',
     } as any);
@@ -220,71 +224,79 @@ describe('SubscriptionsService', () => {
       billingCycle: BillingCycleEnum.MONTHLY,
     });
 
+    // must return the subscription payment after found with the same providerEventId
+
     expect(result).toEqual(
       expect.objectContaining({ providerEventId: 'evt-1' }),
     );
     expect(prisma.subscriptionPayment.create).not.toHaveBeenCalled();
   });
 
-  // it('activateAfterSuccessfulPayment() activates a trialing subscription and clears pending fields', async () => {
-  //   prisma.tenantSubscription.findUnique.mockResolvedValue({
-  //     subscriptionId: 'sub-1',
-  //     tenantId: 'tenant-1',
-  //     planId: 'plan-free',
-  //     pendingPlanId: 'plan-pro',
-  //     status: SubscriptionStatusEnum.TRIALING,
-  //     billingCycle: BillingCycleEnum.MONTHLY,
-  //     quotaSnapshot: { maxProjects: 2 },
-  //     priceSnapshot: decimal(0),
-  //     plan: { planId: 'plan-free' },
-  //   } as any);
-  //   prisma.subscriptionPayment.findUnique.mockResolvedValue(null);
-  //   prisma.subscriptionPayment.create.mockResolvedValue({
-  //     paymentId: 'pay-1',
-  //   } as any);
-  //   prisma.plan.findUnique.mockResolvedValue({
-  //     planId: 'plan-pro',
-  //     monthlyPrice: decimal(20),
-  //     yearlyPrice: decimal(200),
-  //     maxProjects: 10,
-  //     maxUsers: 10,
-  //     maxSessions: 10,
-  //     maxRequests: 10,
-  //   } as any);
-  //   prisma.tenantSubscription.update.mockImplementation(
-  //     async ({ data }: any) => ({
-  //       subscriptionId: 'sub-1',
-  //       ...data,
-  //     }),
-  //   );
+  it('activateAfterSuccessfulPayment() activates a trialing subscription and clears pending fields', async () => {
+    // activateAfterSuccessfulPayment()
+    // Returns updated subscription for success
+    // Returns existing payment for duplicate event
 
-  //   const result = await service.activateAfterSuccessfulPayment({
-  //     tenantId: 'tenant-1',
-  //     provider: 'tap',
-  //     providerEventId: 'evt-1',
-  //     providerPaymentRef: 'charge-1',
-  //     tapCardId: 'card-1',
-  //     tapCustomerId: 'customer-1',
-  //     tapPaymentAgreementId: 'agreement-1',
-  //     amount: 20,
-  //     currency: 'USD',
-  //     billingCycle: BillingCycleEnum.MONTHLY,
-  //   });
+    prisma.tenantSubscription.findUnique.mockResolvedValue({
+      subscriptionId: 'sub-1',
+      tenantId: 'tenant-1',
+      planId: 'plan-free',
+      pendingPlanId: 'plan-pro',
+      status: SubscriptionStatusEnum.TRIALING,
+      billingCycle: BillingCycleEnum.MONTHLY,
+      quotaSnapshot: { maxProjects: 2 },
+      priceSnapshot: decimal(0),
+      plan: { planId: 'plan-free' },
+    } as any);
+    prisma.subscriptionPayment.findUnique.mockResolvedValue(null);
+    prisma.subscriptionPayment.create.mockResolvedValue({
+      paymentId: 'pay-1',
+    } as any);
+    prisma.plan.findUnique.mockResolvedValue({
+      planId: 'plan-pro',
+      monthlyPrice: decimal(20),
+      yearlyPrice: decimal(200),
+      maxProjects: 10,
+      maxUsers: 10,
+      maxSessions: 10,
+      maxRequests: 10,
+    } as any);
+    (prisma.tenantSubscription.update as any).mockImplementation(
+      async ({ data }: any) => ({
+        subscriptionId: 'sub-1',
+        ...data,
+      }),
+    );
 
-  //   expect(result.status).toBe(SubscriptionStatusEnum.ACTIVE);
-  //   expect(result.planId).toBe('plan-pro');
-  //   expect(result.pendingPlanId).toBeNull();
-  //   expect(prisma.subscriptionEvent.createMany).toHaveBeenCalledWith({
-  //     data: expect.arrayContaining([
-  //       expect.objectContaining({
-  //         type: SubscriptionEventTypeEnum.PAYMENT_SUCCEEDED,
-  //       }),
-  //       expect.objectContaining({
-  //         type: SubscriptionEventTypeEnum.UPGRADED,
-  //       }),
-  //     ]),
-  //   });
-  // });
+    const result = await service.activateAfterSuccessfulPayment({
+      tenantId: 'tenant-1',
+      provider: 'tap',
+      providerEventId: 'evt-1',
+      providerPaymentRef: 'charge-1',
+      tapCardId: 'card-1',
+      tapCustomerId: 'customer-1',
+      tapPaymentAgreementId: 'agreement-1',
+      amount: 20,
+      currency: 'USD',
+      billingCycle: BillingCycleEnum.MONTHLY,
+    });
+
+    // must return the subscription after update with the status ACTIVE
+
+    expect(result.status).toBe(SubscriptionStatusEnum.ACTIVE);
+    expect((result as any).planId).toBe('plan-pro');
+    expect((result as any).pendingPlanId).toBeNull();
+    expect(prisma.subscriptionEvent.createMany).toHaveBeenCalledWith({
+      data: expect.arrayContaining([
+        expect.objectContaining({
+          type: SubscriptionEventTypeEnum.PAYMENT_SUCCEEDED,
+        }),
+        expect.objectContaining({
+          type: SubscriptionEventTypeEnum.UPGRADED,
+        }),
+      ]),
+    });
+  });
 
   it('markPaymentFailed() returns early on duplicate providerEventId', async () => {
     prisma.tenantSubscription.findUnique.mockResolvedValue({

@@ -103,6 +103,7 @@ Detailed feature docs are available in `docs/`:
 - `docs/AUTHENTICATION_FEATURE.md`
 - `docs/PLANS_SUBSCRIPTIONS_FEATURE.md`
 - `docs/ENTERPRISE_PLAN_REQUEST_FEATURE.md`
+- `docs/TEST_COVERAGE_OVERVIEW.md`
 
 ## First-Run Guide
 
@@ -233,8 +234,9 @@ Admin flow after that:
 ## Useful Commands
 
 ```bash
-pnpm run build
-pnpm run lint
-pnpm run test
+pnpm build
+pnpm lint
+pnpm test
+pnpm test:integration
 pnpm run test:e2e
 ```

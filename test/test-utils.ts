@@ -27,8 +27,6 @@ export async function cleanDatabase(prisma: PrismaClient) {
 }
 
 export async function seedStandardPlans(prisma: PrismaClient) {
-  console.log('creating plans...');
-
   for (const plan of PlansSeedData) {
     await prisma.plan.upsert({
       where: { name: plan.name },

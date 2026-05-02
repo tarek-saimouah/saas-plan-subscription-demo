@@ -73,5 +73,7 @@ export class BillingWebhookService {
 
       return { ok: true };
     }
+
+    return { ignored: true };
   }
 }

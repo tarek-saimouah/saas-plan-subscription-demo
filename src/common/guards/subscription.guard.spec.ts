@@ -3,15 +3,8 @@ import { Reflector } from '@nestjs/core';
 import { SubscriptionGuard } from './subscription.guard';
 import { createPrismaMock } from '../../../test/mock-helpers';
 import { SubscriptionUsageLimitsService } from 'src/subscriptions';
-import {
-  PlanKindEnum,
-  SubscriptionStatusEnum,
-} from 'src/common/enums';
-import {
-  PUBLIC_KEY,
-  QUOTA_KEY,
-  SUBSCRIPTION_KEY,
-} from 'src/common/decorators';
+import { PlanKindEnum, SubscriptionStatusEnum } from 'src/common/enums';
+import { PUBLIC_KEY, QUOTA_KEY, SUBSCRIPTION_KEY } from 'src/common/decorators';
 
 describe('SubscriptionGuard', () => {
   const reflector = {
@@ -45,8 +38,9 @@ describe('SubscriptionGuard', () => {
   });
 
   it('throws when JWT has no tenantId', async () => {
-    await expect(guard.canActivate(createContext({ userId: 'user-1' }))).rejects
-      .toBeInstanceOf(ForbiddenException);
+    await expect(
+      guard.canActivate(createContext({ userId: 'user-1' })),
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('throws when tenant has no subscription', async () => {

@@ -19,7 +19,12 @@ import {
   addDaysToDate,
 } from 'src/common';
 import { PrismaService } from 'src/database';
-import { Plan, Prisma } from 'src/generated/prisma/client';
+import {
+  Plan,
+  Prisma,
+  SubscriptionPayment,
+  TenantSubscription,
+} from 'src/generated/prisma/client';
 import { GetSubscriptionDto, SubscriptionResponseDto } from './dto';
 import { SubscriptionMapper } from './mappers';
 
@@ -471,6 +476,9 @@ export class SubscriptionsService {
    * renewal
    * upgrade
    * resubscribe suspended
+   *
+   * Returns updated subscription for success
+   * Returns existing payment for duplicate event
    */
   async activateAfterSuccessfulPayment(params: {
     tenantId: string;
@@ -484,7 +492,7 @@ export class SubscriptionsService {
     currency: string;
     billingCycle: BillingCycleEnum;
     rawPayload?: Prisma.JsonValue;
-  }) {
+  }): Promise<TenantSubscription | SubscriptionPayment> {
     return this.prisma.$transaction(async (tx) => {
       const subscription = await tx.tenantSubscription.findUnique({
         where: { tenantId: params.tenantId },
