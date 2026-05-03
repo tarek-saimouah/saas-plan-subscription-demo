@@ -130,6 +130,7 @@ export class PlansController {
     type: ErrorResponseDto,
     description: 'When trying to delete free plan or plan with subscriptions',
   })
+  // permissions
   @Roles(['admin'])
   @Delete(':id')
   remove(@Param('id') id: string): Promise<MessageResponseDto> {

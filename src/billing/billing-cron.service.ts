@@ -109,11 +109,10 @@ export class BillingCronService {
 
         this.logger.info({ cardToken });
 
-        const amount =
-          sub.billingCycle === BillingCycleEnum.MONTHLY
-            ? sub.plan.monthlyPrice.toNumber()
-            : sub.plan.yearlyPrice.toNumber();
-
+        const amount = this.subscriptionsService.getSubscriptionPriceAmount({
+          plan: sub.plan,
+          billingCycle: sub.billingCycle as BillingCycleEnum,
+        });
         await this.paymentGatewayService.createRecurringCharge({
           amount,
           currency: sub.plan.currency,

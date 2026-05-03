@@ -195,60 +195,6 @@ export class SubscriptionsService {
     });
   }
 
-  // Not used
-  async upgradeNowWithFullAmount(params: {
-    tenantId: string;
-    targetPlanId: string;
-    billingCycle: BillingCycleEnum;
-  }) {
-    const subscription = await this.prisma.tenantSubscription.findUnique({
-      where: { tenantId: params.tenantId },
-      include: { plan: true },
-    });
-
-    this.logger.info({ subscription });
-
-    if (!subscription) throw new NotFoundException('Subscription not found');
-
-    const targetPlan = await this.prisma.plan.findUnique({
-      where: { planId: params.targetPlanId },
-    });
-
-    this.logger.info({ targetPlan });
-
-    if (!targetPlan || !targetPlan.isActive) {
-      throw new BadRequestException('Target plan not found');
-    }
-
-    if (
-      targetPlan.kind === PlanKindEnum.ENTERPRISE_CUSTOM &&
-      targetPlan.tenantId !== params.tenantId
-    ) {
-      throw new BadRequestException(
-        'Enterprise plan not available for this tenant',
-      );
-    }
-
-    if (
-      targetPlan.monthlyPrice.lessThanOrEqualTo(subscription.plan.monthlyPrice)
-    ) {
-      throw new BadRequestException('Not an upgrade');
-    }
-
-    // The business rule here is "pay full amount now, extend 30 days from today"
-    // Payment execution is handled by PaymentProviderService + webhook confirmation.
-    return {
-      fromPlan: subscription.plan,
-      toPlan: targetPlan,
-      amount: this.getSubscriptionPriceAmount({
-        plan: targetPlan,
-        billingCycle: params.billingCycle,
-      }),
-      currency: targetPlan.currency,
-      extendByDays: 30,
-    };
-  }
-
   async scheduleDowngrade(params: { tenantId: string; targetPlanId: string }) {
     return this.prisma.$transaction(async (tx) => {
       const subscription = await tx.tenantSubscription.findUnique({
@@ -927,7 +873,7 @@ export class SubscriptionsService {
 
   // helper methods
 
-  private getSubscriptionPriceAmount(params: {
+  getSubscriptionPriceAmount(params: {
     plan: Plan;
     billingCycle: BillingCycleEnum;
   }): number {
