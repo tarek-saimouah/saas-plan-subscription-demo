@@ -146,7 +146,7 @@ export class EnterprisePlanRequestsDashboardController {
   // permissions
   @Roles(['admin'])
   @Post(':id/approve-and-create')
-  async update(
+  async approveAndCreatePlan(
     @Param('id') id: string,
     @Body() payload: CreateEnterprisePlanDto,
     @DecodedUser() decodedUser: JwtDecodedEntity,

@@ -114,7 +114,7 @@ export class TenantsController {
   })
   @Roles(['user'])
   @Patch('profile')
-  async update(
+  async updateProfile(
     @DecodedUser() decodedUser: JwtDecodedEntity,
     @Body() payload: UpdateTenantDto,
   ): Promise<DataResponse<TenantResponseDto>> {
