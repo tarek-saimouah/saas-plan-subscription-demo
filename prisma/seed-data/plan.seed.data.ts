@@ -1,3 +1,4 @@
+import { CurrencyEnum } from '../../src/common/enums/currency.enum';
 import { PlanKindEnum } from '../../src/common/enums/plan-kind.enum';
 import { Prisma } from '../../src/generated/prisma/client';
 
@@ -11,6 +12,7 @@ export const PlansSeedData: Prisma.PlanCreateInput[] = [
     monthlyPrice: 0,
     yearlyPrice: 0,
     trialDays: 14,
+    currency: CurrencyEnum.KWD,
     // quota
     maxProjects: 2,
     maxUsers: 2,
@@ -25,6 +27,7 @@ export const PlansSeedData: Prisma.PlanCreateInput[] = [
     kind: PlanKindEnum.STANDARD,
     monthlyPrice: 20,
     yearlyPrice: 200,
+    currency: CurrencyEnum.KWD,
     // quota
     maxProjects: 10,
     maxUsers: 10,
@@ -39,6 +42,7 @@ export const PlansSeedData: Prisma.PlanCreateInput[] = [
     kind: PlanKindEnum.STANDARD,
     monthlyPrice: 50,
     yearlyPrice: 500,
+    currency: CurrencyEnum.KWD,
     // quota
     maxProjects: 40,
     maxUsers: 40,

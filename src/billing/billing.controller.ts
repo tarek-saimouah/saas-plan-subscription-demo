@@ -33,7 +33,6 @@ import { BillingService } from './billing.service';
 
 @ApiInternalServerErrorResponse({ type: ErrorResponseDto })
 @ApiUnauthorizedResponse({ type: ErrorResponseDto })
-@ApiBearerAuth()
 @ApiTags('billing')
 @Controller('billing')
 export class BillingController {
@@ -59,6 +58,7 @@ export class BillingController {
     summary: 'Roles: (user)',
     description: 'upgrade plan',
   })
+  @ApiBearerAuth()
   @ApiCreatedDataResponse(RequestPlanSubscriptionResponseDto)
   @ApiBadRequestResponse({
     type: ErrorResponseDto,
@@ -81,6 +81,7 @@ export class BillingController {
     summary: 'Roles: (user)',
     description: 'enterprise plan subscribe',
   })
+  @ApiBearerAuth()
   @ApiCreatedDataResponse(RequestPlanSubscriptionResponseDto)
   @ApiBadRequestResponse({
     type: ErrorResponseDto,
@@ -103,6 +104,7 @@ export class BillingController {
     summary: 'Roles: (user)',
     description: 'downgrade plan',
   })
+  @ApiBearerAuth()
   @ApiResponse({ type: MessageResponseDto })
   @ApiBadRequestResponse({
     type: ErrorResponseDto,
@@ -124,6 +126,7 @@ export class BillingController {
     summary: 'Roles: (user)',
     description: 'resubscribe suspended plan',
   })
+  @ApiBearerAuth()
   @ApiCreatedDataResponse(RequestPlanSubscriptionResponseDto)
   @ApiBadRequestResponse({
     type: ErrorResponseDto,
@@ -146,6 +149,7 @@ export class BillingController {
     summary: 'Roles: (user)',
     description: 'cancel current subscription plan',
   })
+  @ApiBearerAuth()
   @ApiResponse({ type: MessageResponseDto })
   @ApiBadRequestResponse({
     type: ErrorResponseDto,
