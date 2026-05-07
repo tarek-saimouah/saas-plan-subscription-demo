@@ -178,7 +178,7 @@ export class TenantsController {
 
   @ApiOperation({
     summary: 'Roles: (user)',
-    description: 'Get payments (paging)',
+    description: 'Get subscription events (paging)',
   })
   @ApiPaginatedResponse(SubscriptionEventResponseDto)
   // permissions

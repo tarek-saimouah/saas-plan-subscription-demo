@@ -111,7 +111,7 @@ export class TapPaymentGatewayService {
         id: this.TAP_MERCHANT_ID,
       },
       redirect: {
-        url: this.TAP_PAYMENT_REDIRECT_URL,
+        url: payload.redirectUrl || this.TAP_PAYMENT_REDIRECT_URL,
       },
       // webhook endpoint
       post: {

@@ -32,10 +32,10 @@ export class BillingWebhookService {
       const paymentRef = event.id;
       const amount = event.amount;
       const currency = event.currency ?? 'USD';
-      const tapPaymentAgreementId = event.payment_agreement.id;
-      const tapCardId = event.card.id || event.payment_agreement.contract.id;
+      const tapPaymentAgreementId = event.payment_agreement?.id;
+      const tapCardId = event.card.id || event.payment_agreement?.contract.id;
       const tapCustomerId =
-        event.customer.id || event.payment_agreement.contract.customer_id;
+        event.customer.id || event.payment_agreement?.contract.customer_id;
 
       const tenantId = event.metadata.tenantId;
       if (!tenantId) {

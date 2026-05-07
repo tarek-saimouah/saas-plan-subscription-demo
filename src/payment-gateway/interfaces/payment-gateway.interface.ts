@@ -26,4 +26,6 @@ export interface IPaymentGateway {
     referenceTransaction: string;
     metadata: Record<string, any>;
   }): Promise<any>;
+
+  retriveCharge(chargeId: string): Promise<any>;
 }

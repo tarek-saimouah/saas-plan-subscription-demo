@@ -175,6 +175,7 @@ export interface CreateChargePayload {
   metadata: EPaymentMetadata;
   referenceOrder: string;
   referenceTransaction: string;
+  redirectUrl?: string;
 }
 
 export interface CreateRecurringChargePayload {
@@ -395,7 +396,7 @@ export interface TapWebhookEvent {
     remarks: string;
   }>;
   auto_reversed: boolean;
-  payment_agreement: {
+  payment_agreement?: {
     id: string;
     amount_variability: string;
     type: string;

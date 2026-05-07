@@ -85,6 +85,25 @@ export class PaymentGatewayService implements IPaymentGateway {
     return response;
   }
 
+  async retriveCharge(chargeId: string) {
+    const { response, error } =
+      await this.paymentProvider.retrieveCharge(chargeId);
+
+    if (error) {
+      throw new Error(
+        `Error retrieving payment with payment provider: ${error}`,
+      );
+    }
+
+    if (!response) {
+      throw new Error(
+        'Error retrieving payment with payment provider: response is null',
+      );
+    }
+
+    return response;
+  }
+
   validateWebhookPayload(payload: any, postedHashString: string): boolean {
     return this.paymentProvider.validateWebhookPayload(
       payload,
